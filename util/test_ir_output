@@ -1,0 +1,58 @@
+#! /bin/bash
+
+#confirm that java 11+ is installed
+if type -p java; then
+    echo found java executable in PATH
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo found java executable in JAVA_HOME     
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "ERROR: Java is not installed."
+fi
+if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    echo version "$version"
+    if [[ "$version" > "11.0" ]]; then
+        echo "INFO: Java version is sufficient. Continuing test."
+    else         
+        echo "ERROR: Java version is <11.0."
+    fi
+fi
+
+#collect array of ir files in ir_home
+IR_HOME=./ir
+irFiles=()
+while IFS=  read -r -d $'\0'; do
+    irFiles+=("$REPLY")
+done < <(find $IR_HOME -name "*.ir" -print0)
+
+#print available ir test files
+i=0
+for irFile in "${irFiles[@]}"; do 
+	((i=i+1))
+	echo -e "\t$i) $irFile";
+done
+
+#get option selected by user
+read -p 'Select Option: ' irFileIndex
+while [ $irFileIndex -gt $i ]
+do
+	echo -e "\tERROR: Option is not valid. Try again."
+	read -p 'Select Option: ' irFileIndex
+done
+
+#set ir file to test
+((irFileIndex=irFileIndex-1))
+IR_INPUT_FILE=${irFiles[$irFileIndex]}
+
+#run the ir interpreter
+java -jar $IR_HOME/tigerc-ir.jar -i $IR_INPUT_FILE
+result=$?
+
+#note the results
+if [[ $result ]]; then 
+	echo "INFO: Incorrect IR."
+else
+	echo "INFO: Correct IR."
+fi

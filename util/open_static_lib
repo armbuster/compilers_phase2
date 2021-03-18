@@ -1,0 +1,11 @@
+#! /bin/bash
+
+ANTLR_LIB=antlr/lib
+
+if [ ! -f "$ANTLR_LIB/libantlr4-runtime.a" ]; then
+	echo "INFO: unzipping libantlr4-runtime.tar.gz"
+	cd $ANTLR_LIB/
+	tar -xzvf libantlr4-runtime-static.tar.gz
+else
+	echo "INFO: libantlr4-runtime.tar.gz already unzipped"
+fi

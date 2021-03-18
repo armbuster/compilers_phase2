@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# unzip antlr static lib
+./util/open_static_lib 
+
+# create ir output directory
+# ./util/create_ir_output_dir
+
+if [ ! -d "build" ]; then
+	echo "INFO: creating build/"
+	mkdir build
+fi
+cd build/
+echo "INFO: in build/"
+cmake ../ -DCMAKE_CXX_COMPILER=g++
+make -j2
+echo "INFO: building the executables"
+# echo "return status is = $?"
+if [ "$?" -eq 0 ]; then
+	echo ""
+	echo "INFO: build is done"
+	echo "INFO: Navigate to build/src to run the executable"
+	echo ""
+else
+	echo ""
+	echo "INFO: build failed"
+	echo ""
+fi

@@ -1,0 +1,11 @@
+#libs
+antlr/lib/libantlr4-runtime.a
+
+#directories
+build/
+
+#file types
+.DS_Store
+*.ir
+.antlr/
+.vscode/
