@@ -1,7 +1,9 @@
 #! /bin/bash
 
+# TODO: add script to check for the googletest content
+
 # unzip antlr static lib
-./util/open_static_lib 
+./util/open_static_lib
 
 # create ir output directory
 # ./util/create_ir_output_dir
@@ -13,7 +15,7 @@ fi
 cd build/
 echo "INFO: in build/"
 cmake ../ -DCMAKE_CXX_COMPILER=g++
-make -j2
+make -j1
 echo "INFO: building the executables"
 # echo "return status is = $?"
 if [ "$?" -eq 0 ]; then
