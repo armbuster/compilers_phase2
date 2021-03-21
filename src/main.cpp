@@ -1,4 +1,5 @@
-#include "ParseTree.h"
+#include "Instruction.h"
+#include "IrEnums.h"
 
 
 // CITATION:
