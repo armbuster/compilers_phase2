@@ -2,27 +2,41 @@ grammar tigerIr;
 
 
 irProgram : function functionSeq;
-functionSeq : function functionSeq
-            |;
-function : START_FUNCTION ID NEWLINE typeId ID OPENPAREN paramList CLOSEPAREN NEWLINE INT_LIST varList NEWLINE FLOAT_LIST varList NEWLINE funcBody END_FUNCTION ID NEWLINE;
-paramList : param paramListTail
-        |
+functionSeq : function functionSeq # functionSeqNonempty
+            |                      # functionSeqEmpty
+            ;
+function : START_FUNCTION ID NEWLINE typeId ID OPENPAREN paramList CLOSEPAREN NEWLINE INT_LIST varList NEWLINE FLOAT_LIST varList NEWLINE funcBody END_FUNCTION ID multipleNewline;
+paramList : param paramListTail # paramListNonEmpty
+        | # paramListEmpty
         ;
-paramListTail : COMMA param paramListTail
-        |
+paramListTail : COMMA param paramListTail # paramListTailNonEmpty
+        | # paramListTailEmpty
         ;
 param : typeId ID;
 
-typeId : INT | FLOAT | VOID;
+typeId : INT # typeIdInt
+        | FLOAT # typeIdFloat
+        | VOID # typeIdVoid
+        ;
 
-varList : ID COMMA varList
-        | ID
-        |;
+varList : ID arrayDeref COMMA varList # varListExpand
+        | ID arrayDeref # varListSingle
+        | # varListEmpty
+        ;
+
+arrayDeref : OPENBRACK INTLIT  CLOSEBRACK # arrayDerefNonempty
+        | # arrayDerefEmpty
+        ;
+
+multipleNewline : NEWLINE multipleNewline
+                |
+                ;
 
 
 funcBody : ID COLON NEWLINE statSeq;
-statSeq : stat statSeq
-        |;
+statSeq : stat statSeq # statSeqNonempty
+        | # statSeqEmpty
+        ;
 
 stat :  assign
       |  add
@@ -45,7 +59,8 @@ stat :  assign
       |  array_store
       |  array_load
       |  array_assign
-      | label;
+      | label
+      ;
         
 
 
@@ -85,7 +100,10 @@ exprList : val COMMA exprList optionalComma
 
 optionalComma : COMMA |;
 
-val : ID | INTLIT | FLOATLIT;
+val : ID # valId
+    | INTLIT # valIntLit
+    | FLOATLIT # valFloatLit
+    ;
 
 
 ARRAY_STORE : 'array_store' ;
@@ -131,7 +149,7 @@ NEWLINE : '\n';
 START_FUNCTION : '#start_function' ;
 END_FUNCTION : '#end_function' ;
 
-ID : '_'?([a-zA-Z]|[0-9]|'_')+;
+ID : '_'?[a-zA-Z]([a-zA-Z]|[0-9]|'_')*;
 INTLIT : '0'|[1-9][0-9]*;
 FLOATLIT : ('0'|[1-9][0-9]*)'.'[0-9]*;
 WS : [ \t\b]+ -> skip ;

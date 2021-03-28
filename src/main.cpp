@@ -1,5 +1,6 @@
 #include "ParseTree.h"
-
+#include "CFG.h"
+#include "CodeGenerator.h"
 
 // CITATION:
 // got these two functions for parsing command line arguments from here
@@ -20,11 +21,11 @@ bool optionExists(char ** start, char ** end, const std::string & option)
 
 int main(int argc, char* argv[]) {
     
-    // //TODO: add option menu class
-    // int tokens_code;
-    // std::string tigerInputFile;
-    // std::string tigerInputFileName;
-    // std::string irOutputFile;
+    //TODO: add option menu class
+    //int tokens_code;
+    std::string inputFile;
+    std::string inputFileName;
+    std::string mipsOutputFile;
 
     // if (optionExists(argv, argv+argc, "-l"))
     //     tokens_code=2;
@@ -33,32 +34,37 @@ int main(int argc, char* argv[]) {
     // else
     //     tokens_code=0;
 
-    // // read input file
-    // if (optionExists(argv, argv+argc, "-i"))
-    // {
-    //     tigerInputFile = getOption(argv, argv+argc, "-i");
-    //     std::string ext = ".tiger";
-    //     if (tigerInputFile.size() > ext.size() &&
-    //         tigerInputFile.substr(tigerInputFile.size() - ext.size()) == ".tiger")
-    //     {
-    //         tigerInputFileName = tigerInputFile.substr(0, tigerInputFile.size() - ext.size());
-    //         irOutputFile = tigerInputFileName+".ir";
-    //     }
-    //     else
-    //     {
-    //         std::cout << "input file must have extension .tiger";
-    //         return -1;
-    //     }
+    // read input file
+    if (optionExists(argv, argv+argc, "-i"))
+    {
+        inputFile = getOption(argv, argv+argc, "-i");
+        std::string ext = ".ir";
+        if (inputFile.size() > ext.size() &&
+            inputFile.substr(inputFile.size() - ext.size()) == ".ir")
+        {
+            inputFileName = inputFile.substr(0, inputFile.size() - ext.size());
+            mipsOutputFile = inputFileName+".s";
+        }
+        else
+        {
+            std::cout << "input file must have extension .ir";
+            return -1;
+        }
 
-    // }
-    // else
-    // {
-    //     std::cout << "missing input file name" << std::endl;
-    //     return -1;
-    // }
+    }
+    else
+    {
+        std::cout << "missing input file name" << std::endl;
+        return -1;
+    }
+
+    tiger::ParseTree * parseTree = new tiger::ParseTree(inputFile);
     
-
-
+    
+    parseTree -> visitTree();
+    Program * program = parseTree->getProgram();
+    CFG cfg(program); // GARRET
+    CodeGenerator codeGenerator(program); // ALEX
     return 0;
 
 }
