@@ -44,8 +44,6 @@ include_directories(${ANTLR_TigerIrParser_OUTPUT_DIR})
 file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.h *.cpp)
 set(SOURCES ${SOURCES})
 
-message(STATUS "SOURCES=${SOURCES}")
-
 # add generated grammar to binary target
 add_executable(${BIN_NAME} main.cpp
                ${ANTLR_TigerIrLexer_CXX_OUTPUTS}
