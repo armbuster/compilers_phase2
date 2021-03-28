@@ -34,7 +34,7 @@ class ParseTree
  	antlr4::CommonTokenStream* getTokens() { return tokens; };
  	std::string getTigerFileName(){ return tigerFileName; };
  	std::string getIrFileName(){ return irFileName; };
-	Program * getProgram();
+	Module * getModule();
 
  	bool visitTree();
 };

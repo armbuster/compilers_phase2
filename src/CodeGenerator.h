@@ -1,10 +1,10 @@
-#include "Program.h"
+#include "Module.h"
 
 
 
 class CodeGenerator{
-    Program * program;
+    Module * mod;
     public:
-        CodeGenerator(Program * p);
+        CodeGenerator(Module * m);
 
 };

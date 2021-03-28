@@ -5,19 +5,18 @@
 
 irVisitor::irVisitor()
 {
-    program = new Program();
+    mod = new Module();
 }
 
-Program * irVisitor::getProgram()
+Module * irVisitor::getModule()
 {
-    return program;
+    return mod;
 }
 
 
 antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ctx){
 
     // get info about the function
-    std::cout << "Visit Function" << std::endl;
     std::deque<std::string> params = visit(ctx -> paramList());
     DataType dtype = visit(ctx -> typeId());
     std::string funcname = ctx -> ID(0) -> getText();
@@ -27,7 +26,7 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     // create function object
     Function * currentFunction = new Function(funcname, dtype, floatList, intList);
     visit(ctx -> funcBody());
-    program -> addFunction(currentFunction);
+    mod -> addFunction(currentFunction);
     return 0;
 
 }
@@ -137,12 +136,17 @@ antlrcpp::Any irVisitor::visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEm
 
 
 
-// antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
+antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     
-//     // TODO: implement ProgramValue struct
-//     // Instruction * instr = new Instruction(ASSIGN, );
+    // TODO: implement ProgramValue struct
     
-// }
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(0)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    Instruction * instr = new AssignInstruction(ASSIGN, lhs, rhs);
+    return 0;
+}
 
 // antlrcpp::Any irVisitor::visitAdd(tiger::tigerIrParser::AddContext *ctx){}
 

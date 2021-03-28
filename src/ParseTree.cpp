@@ -31,7 +31,7 @@ bool tiger::ParseTree::visitTree()
     return true;
 }
 
-Program * tiger::ParseTree::getProgram()
+Module * tiger::ParseTree::getModule()
 {
-    return visitor -> getProgram();
+    return visitor -> getModule();
 }

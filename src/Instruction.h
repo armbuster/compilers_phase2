@@ -43,38 +43,39 @@ enum InstructionType {
 class Instruction {
 
     InstructionType instruction;
-    std::map<std::string, DataType> operandTypes; // types of operands
-    std::vector<std::string> define; // names of operands that are defined here
-    std::vector<std::string> use; // names of operands that are used here
-    std::vector<std::string> in; // in set - UPDATED BY LIVELINESS ANALYSIS
-    std::vector<std::string> out; // out set - UPDATED BY LIVELINESS ANALYSIS
+    //std::map<std::string, DataType> operandTypes; // types of operands
+    std::vector<ProgramValue> define; // names of operands that are defined here
+    std::vector<ProgramValue> use; // names of operands that are used here
+    std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
+    std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
     std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
     // UPDATED BY REGISTER ALLOCATOR
     bool leader; // whether or not this instruction is the start of a basic block
 
     public:
-        Instruction(InstructionType instruction_, std::vector<std::string> define_, std::vector<std::string> use_);
-        virtual ~Instruction() = 0;
-        virtual void setOperands() = 0;
-
+        Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
+        //virtual ~Instruction() = 0;
+        //virtual void setOperands() = 0;
 };
 
 class BinaryInstruction : public Instruction{
-    std::string rhs1;
-    std::string rhs2;
-    std::string lhs;
+    ProgramValue rhs1;
+    ProgramValue rhs2;
+    ProgramValue lhs;
 
     public:
         //~BinaryInstruction(){};
-        void setOperands(std::string lhs, std::string rhs1, std::string rhs2);
+        void setOperands(ProgramValue lhs, ProgramValue rhs1, ProgramValue rhs2);
 };
 
 
 class AssignInstruction : public Instruction{
-    std::string rhs;
-    std::string lhs;
+    ProgramValue rhs;
+    ProgramValue lhs;
 
     public:
-        //~AssignInstruction(){};
-        void setOperands(std::string lhs_, std::string rhs_);
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(ProgramValue lhs_, ProgramValue rhs_);
 };

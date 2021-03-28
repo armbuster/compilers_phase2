@@ -4,7 +4,7 @@
 
 
 
-class Program {
+class Module {
 
     std::vector<Function *> functionSeq;
 

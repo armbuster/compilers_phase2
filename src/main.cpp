@@ -1,5 +1,5 @@
 #include "ParseTree.h"
-#include "CFG.h"
+//#include "CFG.h"
 #include "CodeGenerator.h"
 
 // CITATION:
@@ -60,11 +60,16 @@ int main(int argc, char* argv[]) {
 
     tiger::ParseTree * parseTree = new tiger::ParseTree(inputFile);
     
-    
     parseTree -> visitTree();
-    Program * program = parseTree->getProgram();
-    CFG cfg(program); // GARRET
-    CodeGenerator codeGenerator(program); // ALEX
+    Module * mod = parseTree->getModule();
+
+    
+    // if register allocation strategy is not naive
+    /// GARRETS SECTION    
+    // CFG cfg(program); // GARRET
+
+    // END GARRETS SECION
+    CodeGenerator codeGenerator(mod); // ALEX
     return 0;
 
 }

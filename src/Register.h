@@ -10,7 +10,7 @@ enum RegisterClass {A, T, S, V};
 // V - return value registers
 
 // TODO: Register allocation will need to create map that looks something like
-// map<RegisterClass, unsigned int> to track which are available to be allocated
+// map<RegisterClass , vector<unsigned int> > to track which are available to be allocated
 
 class Register : public StorageLocation {
     

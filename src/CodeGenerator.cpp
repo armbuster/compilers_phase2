@@ -1,7 +1,7 @@
 #include "CodeGenerator.h"
 
 
-CodeGenerator::CodeGenerator(Program * program_)
+CodeGenerator::CodeGenerator(Module * m)
 {
-    program = program_;
+    mod = m;
 }

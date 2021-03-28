@@ -3,7 +3,7 @@
 
 
 #include "tigerIrBaseVisitor.h"
-#include "Program.h"
+#include "Module.h"
 #include <string>
 #include <map>
 #include <deque>
@@ -11,13 +11,13 @@
 
 
  class irVisitor : public tiger::tigerIrBaseVisitor {
-     Program * program;
+     Module * mod;
      Function * currentFunction;
 
      public:
         irVisitor();
 
-        Program * getProgram();
+        Module * getModule();
 
         antlrcpp::Any visitFunction(tiger::tigerIrParser::FunctionContext *ctx);
 
@@ -47,10 +47,7 @@
 
         antlrcpp::Any visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEmptyContext *ctx);
 
-
-
-
-        //antlrcpp::Any visitAssign(tiger::tigerIrParser::AssignContext *ctx);
+        antlrcpp::Any visitAssign(tiger::tigerIrParser::AssignContext *ctx);
 
         // antlrcpp::Any visitAdd(tiger::tigerIrParser::AddContext *ctx);
 
