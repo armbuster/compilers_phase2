@@ -4,6 +4,8 @@
 
 #include "tigerIrBaseVisitor.h"
 #include "Module.h"
+#include "Instruction.h"
+#include "Function.h"
 #include <string>
 #include <map>
 #include <deque>
@@ -49,31 +51,31 @@
 
         antlrcpp::Any visitAssign(tiger::tigerIrParser::AssignContext *ctx);
 
-        // antlrcpp::Any visitAdd(tiger::tigerIrParser::AddContext *ctx);
+        antlrcpp::Any visitAdd(tiger::tigerIrParser::AddContext *ctx);
 
-        // antlrcpp::Any visitSub(tiger::tigerIrParser::SubContext *ctx);
+        antlrcpp::Any visitSub(tiger::tigerIrParser::SubContext *ctx);
 
-        // antlrcpp::Any visitMult(tiger::tigerIrParser::MultContext *ctx);
+        antlrcpp::Any visitMult(tiger::tigerIrParser::MultContext *ctx);
 
-        // antlrcpp::Any visitDiv(tiger::tigerIrParser::DivContext *ctx);
+        antlrcpp::Any visitDiv(tiger::tigerIrParser::DivContext *ctx);
 
-        // antlrcpp::Any visitAnd_op(tiger::tigerIrParser::And_opContext *ctx);
+        antlrcpp::Any visitAnd_op(tiger::tigerIrParser::And_opContext *ctx);
 
-        // antlrcpp::Any visitOr_op(tiger::tigerIrParser::Or_opContext *ctx);
+        antlrcpp::Any visitOr_op(tiger::tigerIrParser::Or_opContext *ctx);
 
-        // antlrcpp::Any visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx);
+        antlrcpp::Any visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx);
 
-        // antlrcpp::Any visitBreq(tiger::tigerIrParser::BreqContext *ctx);
+        antlrcpp::Any visitBreq(tiger::tigerIrParser::BreqContext *ctx);
 
-        // antlrcpp::Any visitBrneq(tiger::tigerIrParser::BrneqContext *ctx);
+        antlrcpp::Any visitBrneq(tiger::tigerIrParser::BrneqContext *ctx);
 
-        // antlrcpp::Any visitBrlt(tiger::tigerIrParser::BrltContext *ctx);
+        antlrcpp::Any visitBrlt(tiger::tigerIrParser::BrltContext *ctx);
 
-        // antlrcpp::Any visitBrgt(tiger::tigerIrParser::BrgtContext *ctx);
+        antlrcpp::Any visitBrgt(tiger::tigerIrParser::BrgtContext *ctx);
 
-        // antlrcpp::Any visitBrleq(tiger::tigerIrParser::BrleqContext *ctx);
+        antlrcpp::Any visitBrleq(tiger::tigerIrParser::BrleqContext *ctx);
 
-        // antlrcpp::Any visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx);
+        antlrcpp::Any visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx);
 
         // antlrcpp::Any visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx);
 

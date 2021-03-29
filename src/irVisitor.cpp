@@ -24,7 +24,7 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     std::deque<ProgramValue> floatList = visit(ctx -> varList(1));
     
     // create function object
-    Function * currentFunction = new Function(funcname, dtype, floatList, intList);
+    currentFunction = new Function(funcname, dtype, floatList, intList);
     visit(ctx -> funcBody());
     mod -> addFunction(currentFunction);
     return 0;
@@ -137,42 +137,163 @@ antlrcpp::Any irVisitor::visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEm
 
 
 antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
-    
-    // TODO: implement ProgramValue struct
-    
     std::vector<ProgramValue> lhs; 
     lhs.push_back(visit(ctx -> val(0)));
     std::vector<ProgramValue> rhs;
-    rhs.push_back(visit(ctx -> val(0)));
-    Instruction * instr = new AssignInstruction(ASSIGN, lhs, rhs);
+    rhs.push_back(visit(ctx -> val(1)));
+    AssignInstruction * instr = new AssignInstruction(ASSIGN, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0]);
+    currentFunction -> addInstruction(instr);
     return 0;
 }
 
-// antlrcpp::Any irVisitor::visitAdd(tiger::tigerIrParser::AddContext *ctx){}
 
-// antlrcpp::Any irVisitor::visitSub(tiger::tigerIrParser::SubContext *ctx){}
+antlrcpp::Any irVisitor::visitAdd(tiger::tigerIrParser::AddContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(ADD, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitMult(tiger::tigerIrParser::MultContext *ctx){}
+antlrcpp::Any irVisitor::visitSub(tiger::tigerIrParser::SubContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(SUB, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitDiv(tiger::tigerIrParser::DivContext *ctx){}
+antlrcpp::Any irVisitor::visitMult(tiger::tigerIrParser::MultContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(MULT, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitAnd_op(tiger::tigerIrParser::And_opContext *ctx){}
+antlrcpp::Any irVisitor::visitDiv(tiger::tigerIrParser::DivContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(DIV, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitOr_op(tiger::tigerIrParser::Or_opContext *ctx){}
+antlrcpp::Any irVisitor::visitAnd_op(tiger::tigerIrParser::And_opContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(AND, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx){}
+antlrcpp::Any irVisitor::visitOr_op(tiger::tigerIrParser::Or_opContext *ctx){
+    std::vector<ProgramValue> lhs; 
+    lhs.push_back(visit(ctx -> val(2)));
+    std::vector<ProgramValue> rhs;
+    rhs.push_back(visit(ctx -> val(0)));
+    rhs.push_back(visit(ctx -> val(1)));
+    BinaryInstruction * instr = new BinaryInstruction(OR, lhs, rhs);
+    instr -> setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBreq(tiger::tigerIrParser::BreqContext *ctx){}
+antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    BranchInstruction * instr = new BranchInstruction(GOTO, define, use);
+    instr -> setOperands(ctx -> ID() ->getText());
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBrneq(tiger::tigerIrParser::BrneqContext *ctx){}
+antlrcpp::Any irVisitor::visitBreq(tiger::tigerIrParser::BreqContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BREQ, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBrlt(tiger::tigerIrParser::BrltContext *ctx){}
+antlrcpp::Any irVisitor::visitBrneq(tiger::tigerIrParser::BrneqContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BRNEQ, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBrgt(tiger::tigerIrParser::BrgtContext *ctx){}
+antlrcpp::Any irVisitor::visitBrlt(tiger::tigerIrParser::BrltContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BRLT, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBrleq(tiger::tigerIrParser::BrleqContext *ctx){}
+antlrcpp::Any irVisitor::visitBrgt(tiger::tigerIrParser::BrgtContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BRGT, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx){}
+antlrcpp::Any irVisitor::visitBrleq(tiger::tigerIrParser::BrleqContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BRLEQ, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
+
+antlrcpp::Any irVisitor::visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    use.push_back(visit(ctx -> val(0)));
+    use.push_back(visit(ctx -> val(1)));
+    BranchInstruction * instr = new BranchInstruction(BRGEQ, define, use);
+    instr -> setOperands(ctx -> ID() ->getText(), use[0], use[1]);
+    currentFunction ->addInstruction(instr);
+    return 0;
+}
 
 // antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx){}
 

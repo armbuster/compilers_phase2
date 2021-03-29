@@ -12,7 +12,7 @@
 class Function {
     std::string name; // function name
     DataType rtype;
-    std::vector<Instruction> instructions; // vector of IR instructions in program order
+    std::vector<Instruction *> instructions; // vector of IR instructions in program order
     std::map<std::string, int> branchTargets; // maps each label in IR to the index of the following instruction
     std::vector<Function *> subroutines; // any functions called by this function
     Function * caller; // function that calls this function (NULL in the case of main)

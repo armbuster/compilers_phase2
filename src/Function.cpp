@@ -7,6 +7,8 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
     floatList = floatList_;
     intList = intList_;
 
+    //std::cout << "function constructor: " << name << std::endl;
+
     for(int i = 0; i < floatList.size(); i++)
     {
         // TODO : make sure this wont cause segfault
@@ -20,4 +22,10 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
         intList[i].dtype = INT;
         dtypeMap[intList[i].value] = intList[i];
     }
+}
+
+
+void Function::addInstruction(Instruction * instr)
+{
+    instructions.push_back(instr);
 }

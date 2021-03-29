@@ -5,7 +5,7 @@
 #include <map>
 #include "StorageLocation.h"
 
-enum ValType {VAR, ARRAY, LITERAL};
+enum ValType {VAR, ARRAY, LITERAL, EMPTY};
 enum DataType {FLOAT, INT, VOID, UNKNOWN};
 
 struct ProgramValue {
@@ -64,8 +64,8 @@ class BinaryInstruction : public Instruction{
     ProgramValue lhs;
 
     public:
-        //~BinaryInstruction(){};
-        void setOperands(ProgramValue lhs, ProgramValue rhs1, ProgramValue rhs2);
+        using Instruction::Instruction;
+        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
 };
 
 
@@ -78,4 +78,16 @@ class AssignInstruction : public Instruction{
         // inherit constructor
         using Instruction::Instruction;
         void setOperands(ProgramValue lhs_, ProgramValue rhs_);
+};
+
+class BranchInstruction : public Instruction{
+    ProgramValue lval;
+    ProgramValue rval;
+    std::string label;
+
+    public:
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
 };
