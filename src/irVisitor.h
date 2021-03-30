@@ -49,6 +49,12 @@
 
         antlrcpp::Any visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEmptyContext *ctx);
 
+        antlrcpp::Any visitExprListContinue(tiger::tigerIrParser::ExprListContinueContext *ctx);
+
+        antlrcpp::Any visitExprListSingle(tiger::tigerIrParser::ExprListSingleContext *ctx);
+
+        antlrcpp::Any visitExprListEmpty(tiger::tigerIrParser::ExprListEmptyContext *ctx);
+
         antlrcpp::Any visitAssign(tiger::tigerIrParser::AssignContext *ctx);
 
         antlrcpp::Any visitAdd(tiger::tigerIrParser::AddContext *ctx);
@@ -77,26 +83,28 @@
 
         antlrcpp::Any visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx);
 
-        // antlrcpp::Any visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx);
+        antlrcpp::Any visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx);
 
-        // antlrcpp::Any visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx);
+        antlrcpp::Any visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx);
 
-        // antlrcpp::Any visitCall(tiger::tigerIrParser::CallContext *ctx);
+        antlrcpp::Any visitCall(tiger::tigerIrParser::CallContext *ctx);
 
-        // antlrcpp::Any visitCallr(tiger::tigerIrParser::CallrContext *ctx);
+        antlrcpp::Any visitCallr(tiger::tigerIrParser::CallrContext *ctx);
 
-        // antlrcpp::Any visitArray_store(tiger::tigerIrParser::Array_storeContext *ctx);
+        
+        antlrcpp::Any visitArray_store(tiger::tigerIrParser::Array_storeContext *ctx);
 
-        // antlrcpp::Any visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx);
+        antlrcpp::Any visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx);
 
-        // antlrcpp::Any visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx);
-
+        antlrcpp::Any visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx);
 
         antlrcpp::Any visitValId(tiger::tigerIrParser::ValIdContext *ctx);
 
         antlrcpp::Any visitValIntLit(tiger::tigerIrParser::ValIntLitContext *ctx);
 
         antlrcpp::Any visitValFloatLit(tiger::tigerIrParser::ValFloatLitContext *ctx);
+
+        antlrcpp::Any visitLabel(tiger::tigerIrParser::LabelContext *ctx);
 
 
 };

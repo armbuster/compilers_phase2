@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <deque>
+#include <iostream>
 #include "StorageLocation.h"
 
 enum ValType {VAR, ARRAY, LITERAL, EMPTY};
@@ -40,6 +42,7 @@ enum InstructionType {
     ARRAY_ASSIGN
 };
 
+
 class Instruction {
 
     InstructionType instruction;
@@ -54,6 +57,8 @@ class Instruction {
 
     public:
         Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
+        friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
+
         //virtual ~Instruction() = 0;
         //virtual void setOperands() = 0;
 };
@@ -80,6 +85,7 @@ class AssignInstruction : public Instruction{
         void setOperands(ProgramValue lhs_, ProgramValue rhs_);
 };
 
+
 class BranchInstruction : public Instruction{
     ProgramValue lval;
     ProgramValue rval;
@@ -91,3 +97,43 @@ class BranchInstruction : public Instruction{
         using Instruction::Instruction;
         void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
 };
+
+
+class ReturnInstruction : public Instruction{
+    ProgramValue returnVal;
+
+    public:
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(ProgramValue returnVal_ = {EMPTY, UNKNOWN, "", 0});
+};
+
+
+class CallInstruction : public Instruction{
+    std::deque<ProgramValue> args;
+    std::string funcname;
+    ProgramValue returnVal;
+
+    public:
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval = {EMPTY, UNKNOWN, "", 0});
+};
+
+
+
+class ArrayInstruction : public Instruction{
+    ProgramValue arrayName;
+    ProgramValue index;
+    ProgramValue value;
+
+    public:
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_ = {EMPTY, UNKNOWN, "", 0});
+};
+
+

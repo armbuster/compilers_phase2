@@ -135,6 +135,23 @@ antlrcpp::Any irVisitor::visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEm
 }
 
 
+antlrcpp::Any irVisitor::visitExprListContinue(tiger::tigerIrParser::ExprListContinueContext *ctx){
+    std::deque<ProgramValue> dq = visit(ctx -> exprList());
+    dq.push_front(visit(ctx -> val()));
+    return dq;
+}
+
+antlrcpp::Any irVisitor::visitExprListSingle(tiger::tigerIrParser::ExprListSingleContext *ctx){
+    std::deque<ProgramValue> dq;
+    dq.push_back(visit(ctx -> val()));
+    return dq;
+}
+
+antlrcpp::Any irVisitor::visitExprListEmpty(tiger::tigerIrParser::ExprListEmptyContext *ctx){
+    std::deque<ProgramValue> dq;
+    return dq;
+}
+
 
 antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     std::vector<ProgramValue> lhs; 
@@ -295,17 +312,114 @@ antlrcpp::Any irVisitor::visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx){
     return 0;
 }
 
-// antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx){}
+antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    ReturnInstruction * instr = new ReturnInstruction(RETURN_VOID, define, use);
+    instr -> setOperands();
+    currentFunction ->addInstruction(instr);
+    return 0;
 
-// antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx){}
+}
 
-// antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){}
+antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx){
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define;
+    use.push_back(visit(ctx -> val()));
+    ReturnInstruction * instr = new ReturnInstruction(RETURN_NONVOID, define, use);
+    instr -> setOperands(use[0]);
+    currentFunction ->addInstruction(instr);
+    return 0;
 
-// antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){}
+}
 
-// antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeContext *ctx){}
+antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
+    std::deque<ProgramValue> queue = visit(ctx ->exprList());
+    std::string funcname = ctx -> ID() -> getText();
+    std::vector<ProgramValue> define;
+    std::vector<ProgramValue> use;
+    for(ProgramValue p : queue)
+        use.push_back(p);
+    CallInstruction * instr = new CallInstruction(CALL, define, use);
+    instr -> setOperands(funcname, queue);
+    currentFunction -> addInstruction(instr);
+    return 0;
+}
 
-// antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx){}
+antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
+    std::deque<ProgramValue> queue = visit(ctx ->exprList());
+    ProgramValue rval = visit(ctx -> val());
+    std::string funcname = ctx -> ID() -> getText();
+    std::vector<ProgramValue> define;
+    std::vector<ProgramValue> use;
+    for(ProgramValue p : queue)
+        use.push_back(p);
+    define.push_back(rval);
+    CallInstruction * instr = new CallInstruction(CALL, define, use);
+    instr -> setOperands(funcname, queue, rval);
+    currentFunction -> addInstruction(instr);
+    return 0;
 
-// antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx){}
+}
+
+
+antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeContext *ctx){
+    ProgramValue array = visit(ctx -> val(0));
+    ProgramValue index = visit(ctx -> val(1));
+    ProgramValue storeval = visit(ctx -> val(2));
+    
+    std::vector<ProgramValue> define;
+    std::vector<ProgramValue> use;
+    use.push_back(index);
+    use.push_back(storeval);
+    use.push_back(array);
+
+    ArrayInstruction * instr = new ArrayInstruction(ARRAY_STORE, define, use);
+    instr -> setOperands(array, storeval, index);
+    currentFunction -> addInstruction(instr);
+    return 0;
+
+}
+
+antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx){
+    ProgramValue array = visit(ctx -> val(1));
+    ProgramValue index = visit(ctx -> val(2));
+    ProgramValue loadval = visit(ctx -> val(0));
+    
+    std::vector<ProgramValue> define;
+    std::vector<ProgramValue> use;
+    use.push_back(index);
+    use.push_back(array);
+    define.push_back(loadval);
+
+    ArrayInstruction * instr = new ArrayInstruction(ARRAY_LOAD, define, use);
+    instr -> setOperands(array, loadval, index);
+    currentFunction -> addInstruction(instr);
+    return 0;
+
+}
+
+antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx){
+    
+    ProgramValue array = visit(ctx -> val(0));
+    ProgramValue storeval = visit(ctx -> val(2));
+    
+    std::vector<ProgramValue> define;
+    std::vector<ProgramValue> use;
+    use.push_back(storeval);
+    define.push_back(array);
+
+    ArrayInstruction * instr = new ArrayInstruction(ARRAY_ASSIGN, define, use);
+    instr -> setOperands(array, storeval);
+    currentFunction -> addInstruction(instr);
+    return 0;
+
+}
+
+
+antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
+{
+    currentFunction ->addBranchTarget(ctx -> ID() -> getText());
+    return 0;
+}
 

@@ -6,8 +6,9 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
     rtype = rtype_;
     floatList = floatList_;
     intList = intList_;
+    instr_count = 0;
 
-    //std::cout << "function constructor: " << name << std::endl;
+    //std::cout << "FUNCTION: " << name << std::endl;
 
     for(int i = 0; i < floatList.size(); i++)
     {
@@ -27,5 +28,12 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
 
 void Function::addInstruction(Instruction * instr)
 {
+    //std::cout << *instr << std::endl;
     instructions.push_back(instr);
+    instr_count+=1;
+}
+
+void Function::addBranchTarget(std::string bTarget)
+{
+    branchTargets[bTarget] = instr_count+1;
 }

@@ -86,17 +86,18 @@ return_void : RETURN COMMA COMMA COMMA NEWLINE;
 return_nonvoid : RETURN COMMA val COMMA COMMA NEWLINE;
 
 
-call : CALL COMMA exprList NEWLINE;
-callr : CALLR COMMA exprList NEWLINE;
+call : CALL COMMA ID COMMA exprList NEWLINE;
+callr : CALLR COMMA val COMMA ID COMMA exprList NEWLINE;
 
 
 array_store : ARRAY_STORE COMMA val COMMA val COMMA val NEWLINE;
 array_load : ARRAY_LOAD COMMA val COMMA val COMMA val NEWLINE;
 array_assign : ASSIGN COMMA val COMMA val COMMA val NEWLINE;
 
-exprList : val COMMA exprList optionalComma
-        | val
-        |;
+exprList : val COMMA exprList optionalComma # exprListContinue
+        | val # exprListSingle
+        | # exprListEmpty
+        ;
 
 optionalComma : COMMA |;
 

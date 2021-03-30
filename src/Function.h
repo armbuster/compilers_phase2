@@ -19,9 +19,11 @@ class Function {
     std::deque<ProgramValue> floatList; // float variables used (comes from float-list in IR)
     std::deque<ProgramValue> intList; // int variables used
     std::map<std::string, ProgramValue> dtypeMap;
+    int instr_count;
 
     public:
         Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_);
         void addInstruction(Instruction * instr);
+        void addBranchTarget(std::string label);
 
 };
