@@ -50,5 +50,5 @@ include_directories(${TIGERC_SRC})
 
 # add cmake sub directories
 add_subdirectory(${TIGERC_SRC})
-# add_subdirectory(test)
-# add_subdirectory(lib/googletest)
+add_subdirectory(test)
+add_subdirectory(lib/googletest)
