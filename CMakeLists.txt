@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7 FATAL_ERROR)
 
 #set project name
-project(tigerc)
+project(tiger_ir)
 
 # set ANTLR visitor/listener
 set(CREATE_ANTLR_LISTENER FALSE)
@@ -13,7 +13,7 @@ set(PARSER_NAME tigerIr)
 
 # TODO: find a way to use the variables from one subdirectory in another
 #set(LEXER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/src/${LEXER_NAME})
-#set(PARSER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/src/${PARSER_NAME})
+set(PARSER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/src/${PARSER_NAME})
 
 # compiler must be 11 or 14
 set(CMAKE_CXX_STANDARD 11)

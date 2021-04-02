@@ -52,9 +52,9 @@ add_executable(${BIN_NAME} main.cpp
 
 target_link_libraries(${BIN_NAME} ${ANTLR4_STATIC_LIBRARIES})
 
-# #create static lib from src/ and generated CXX files
-# #this is used to link to the test executable
-# add_library(${LIB_NAME} STATIC ${SOURCES}
-# 			${ANTLR_TigerLexer_CXX_OUTPUTS}
-# 			${ANTLR_TigerParser_CXX_OUTPUTS}
-# 			)
+#create static lib from src/ and generated CXX files
+#this is used to link to the test executable
+add_library(${LIB_NAME} STATIC ${SOURCES}
+			# ${ANTLR_TigerLexer_CXX_OUTPUTS}
+			${ANTLR_TigerParser_CXX_OUTPUTS}
+			)
