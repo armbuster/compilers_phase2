@@ -6,22 +6,32 @@
 #include <string>
 #include <stdexcept>
 
+#include "Module.h"
 
-namespace ir {
+
+namespace IR {
 
 class CFG
 {
  private:
- 	//member variables
+ 	Module* module_;
+ 	bool isFirstInstruction;
+ 	bool isPrevInstructionBr;
 
  public:
- 	CFG();
+ 	CFG(Module*);
  	~CFG(){};
 
- 	//other methods
+ 	//TODO: implement this
+ 	void printCfg(){};
+
+ private:
+ 	bool buildCfg();
+ 	bool isFirstInst(Instruction* inst);
+ 	bool isPrevInstBr(Instruction* inst);
 };
 
-}  // namespace ir
+}  // namespace IR
 
 
 #endif /* _SRC_CFG_H */
