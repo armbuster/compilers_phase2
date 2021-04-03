@@ -11,7 +11,6 @@ Module* irVisitor::getModule()
     return mod;
 }
 
-
 antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ctx){
 
     // get info about the function
@@ -93,7 +92,6 @@ antlrcpp::Any irVisitor::visitVarListEmpty(tiger::tigerIrParser::VarListEmptyCon
     return dq;
 }
 
-
 antlrcpp::Any irVisitor::visitTypeIdInt(tiger::tigerIrParser::TypeIdIntContext *ctx){
     return INT;
     
@@ -106,7 +104,6 @@ antlrcpp::Any irVisitor::visitTypeIdFloat(tiger::tigerIrParser::TypeIdFloatConte
 antlrcpp::Any irVisitor::visitTypeIdVoid(tiger::tigerIrParser::TypeIdVoidContext *ctx){
     return VOID;
 }
-
 
 antlrcpp::Any irVisitor::visitValId(tiger::tigerIrParser::ValIdContext *ctx){
     ProgramValue val = {VAR, UNKNOWN, ctx->ID()->getText(), 0};
@@ -123,7 +120,6 @@ antlrcpp::Any irVisitor::visitValFloatLit(tiger::tigerIrParser::ValFloatLitConte
     return val;
 }
 
-
 antlrcpp::Any irVisitor::visitArrayDerefNonempty(tiger::tigerIrParser::ArrayDerefNonemptyContext *ctx){
     return std::stoi(ctx->INTLIT()->getText());
 }
@@ -131,7 +127,6 @@ antlrcpp::Any irVisitor::visitArrayDerefNonempty(tiger::tigerIrParser::ArrayDere
 antlrcpp::Any irVisitor::visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEmptyContext *ctx){
     return 0;
 }
-
 
 antlrcpp::Any irVisitor::visitExprListContinue(tiger::tigerIrParser::ExprListContinueContext *ctx){
     std::deque<ProgramValue> dq = visit(ctx->exprList());
@@ -150,7 +145,6 @@ antlrcpp::Any irVisitor::visitExprListEmpty(tiger::tigerIrParser::ExprListEmptyC
     return dq;
 }
 
-
 antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     std::vector<ProgramValue> lhs; 
     lhs.push_back(visit(ctx->val(0)));
@@ -159,9 +153,9 @@ antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     AssignInstruction* instr = new AssignInstruction(ASSIGN, lhs, rhs);
     instr->setOperands(lhs[0], rhs[0]);
     currentFunction->addInstruction(instr);
+
     return 0;
 }
-
 
 antlrcpp::Any irVisitor::visitAdd(tiger::tigerIrParser::AddContext *ctx)
 {
@@ -234,8 +228,8 @@ antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidConte
     ReturnInstruction* instr = new ReturnInstruction(RETURN_VOID, define, use);
     instr->setOperands();
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx){
@@ -245,8 +239,8 @@ antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoi
     ReturnInstruction * instr = new ReturnInstruction(RETURN_NONVOID, define, use);
     instr->setOperands(use[0]);
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
@@ -255,27 +249,32 @@ antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
     std::vector<ProgramValue> define;
     std::vector<ProgramValue> use;
     for(ProgramValue p : queue)
+    {
         use.push_back(p);
+    }
     CallInstruction* instr = new CallInstruction(CALL, define, use);
     instr->setOperands(funcname, queue);
     currentFunction->addInstruction(instr);
+
     return 0;
 }
 
 antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
-    std::deque<ProgramValue> queue = visit(ctx ->exprList());
+    std::deque<ProgramValue> queue = visit(ctx->exprList());
     ProgramValue rval = visit(ctx->val());
     std::string funcname = ctx->ID()->getText();
     std::vector<ProgramValue> define;
     std::vector<ProgramValue> use;
     for(ProgramValue p : queue)
+    {
         use.push_back(p);
+    }
     define.push_back(rval);
     CallInstruction* instr = new CallInstruction(CALL, define, use);
     instr->setOperands(funcname, queue, rval);
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 
@@ -293,8 +292,8 @@ antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeConte
     ArrayInstruction* instr = new ArrayInstruction(ARRAY_STORE, define, use);
     instr->setOperands(array, storeval, index);
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx){
@@ -311,8 +310,8 @@ antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext
     ArrayInstruction* instr = new ArrayInstruction(ARRAY_LOAD, define, use);
     instr->setOperands(array, loadval, index);
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx){
@@ -328,8 +327,8 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
     ArrayInstruction* instr = new ArrayInstruction(ARRAY_ASSIGN, define, use);
     instr->setOperands(array, storeval);
     currentFunction->addInstruction(instr);
-    return 0;
 
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
@@ -349,6 +348,7 @@ antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstructionType instType)
     BinaryInstruction* instr = new BinaryInstruction(instType, lhs, rhs);
     instr->setOperands(lhs[0], rhs[0], rhs[1]);
     currentFunction->addInstruction(instr);
+
     return 0;
 }
 
@@ -360,5 +360,6 @@ antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstructionType instType)
     BranchInstruction* instr = new BranchInstruction(instType, define, use);
     instr->setOperands(ctx->ID()->getText());
     currentFunction->addInstruction(instr);
+
     return 0;
 }

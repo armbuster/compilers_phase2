@@ -59,6 +59,7 @@ class Instruction {
     public:
         Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
+        void markAsLeader();
 
         //virtual ~Instruction() = 0;
         //virtual void setOperands() = 0;

@@ -69,6 +69,12 @@ Instruction::Instruction(InstructionType instruction_, std::vector<ProgramValue>
     instruction = instruction_;
     define = define_;
     use = use_;
+    isLeader = false;
+}
+
+void Instruction::markAsLeader()
+{
+    isLeader = true;
 }
 
 void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
@@ -84,8 +90,6 @@ void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, Progr
     rhs2 = rhs2_;
 }
 
-
-
 void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
 {
     lval = lval_;
@@ -96,7 +100,6 @@ void ReturnInstruction::setOperands(ProgramValue returnVal_)
 {
     returnVal = returnVal_;
 }
-
 
 void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval_)
 {
