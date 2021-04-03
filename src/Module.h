@@ -3,13 +3,13 @@
 #include "Function.h"
 
 
-
 class Module {
 
-    std::vector<Function*> functionSeq;
+   FunctionContainer functionSeq;
 
     public:
         Function* getFunction(std::string name);
+        FunctionContainer getFunctions() { return functionSeq; };
         void addFunction(Function* f);
 
 };
