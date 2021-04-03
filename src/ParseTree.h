@@ -16,7 +16,7 @@ namespace tiger {
 class ParseTree
 {
  private:
-	irVisitor * visitor;
+	irVisitor* visitor;
  	tiger::tigerIrLexer* lexer;
  	tiger::tigerIrParser* parser;
  	antlr4::ANTLRInputStream* tokenStream;
@@ -34,7 +34,7 @@ class ParseTree
  	antlr4::CommonTokenStream* getTokens() { return tokens; };
  	std::string getTigerFileName(){ return tigerFileName; };
  	std::string getIrFileName(){ return irFileName; };
-	Module * getModule();
+	Module* getModule();
 
  	bool visitTree();
 };

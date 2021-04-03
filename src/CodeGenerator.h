@@ -1,10 +1,9 @@
 #include "Module.h"
 
 
-
 class CodeGenerator{
-    Module * mod;
+    Module* mod;
     public:
-        CodeGenerator(Module * m);
+        CodeGenerator(Module* m);
 
 };
