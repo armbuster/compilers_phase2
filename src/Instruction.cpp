@@ -19,11 +19,11 @@ std::ostream& operator<<(std::ostream& out, const ValType vtype)
 }
 
 
-std::ostream& operator<<(std::ostream& out, const InstructionType instr)
+std::ostream& operator<<(std::ostream& out, const InstOpType instOpType)
 {
     const char* s=0;
     #define PROCESS_VAL(p) case(p): s = #p; break;
-    switch(instr)
+    switch(instOpType)
     {
         PROCESS_VAL(ASSIGN);
         PROCESS_VAL(ADD);
@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& out, const InstructionType instr)
 
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
 {
-    out << instr.instruction << ", DEFINE: ";
+    out << instr.instOpType << ", DEFINE: ";
     for(ProgramValue p : instr.define)
         out << "(" << p.vtype << "," << p.value << ") ";
     out << "   USE: ";
@@ -64,9 +64,9 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr)
     return out;
 }
 
-Instruction::Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
+Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
 {
-    instruction = instruction_;
+    instOpType = instOpType_;
     define = define_;
     use = use_;
     isLeader = false;
@@ -77,10 +77,20 @@ void Instruction::markAsLeader()
     isLeader = true;
 }
 
+bool AssignInstruction::is(IR::InstType instType)
+{
+    return instType == IR::ASSIGN;
+}
+
 void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
 {
     lhs = lhs_;
     rhs = rhs_;
+}
+
+bool BinaryInstruction::is(IR::InstType instType)
+{
+    return instType == IR::BINARY;
 }
 
 void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_)
@@ -90,10 +100,20 @@ void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, Progr
     rhs2 = rhs2_;
 }
 
+bool BranchInstruction::is(IR::InstType instType)
+{
+    return instType == IR::BRANCH;
+}
+
 void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
 {
     lval = lval_;
     rval = rval_;
+}
+
+bool ReturnInstruction::is(IR::InstType instType)
+{
+    return instType == IR::RETURN;
 }
 
 void ReturnInstruction::setOperands(ProgramValue returnVal_)
@@ -101,9 +121,19 @@ void ReturnInstruction::setOperands(ProgramValue returnVal_)
     returnVal = returnVal_;
 }
 
+bool CallInstruction::is(IR::InstType instType)
+{
+    return instType == IR::CALL;
+}
+
 void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval_)
 {
     args = args_;
+}
+
+bool ArrayInstruction::is(IR::InstType instType)
+{
+    return instType == IR::ARRAY;
 }
 
 void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
