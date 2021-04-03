@@ -107,9 +107,9 @@
 
      private:
         template <class ctxType>
-        antlrcpp::Any visitBinInst(ctxType *ctx, InstructionType instType);
+        antlrcpp::Any visitBinInst(ctxType *ctx, InstOpType instOpType);
 
         template <class ctxType>
-        antlrcpp::Any visitBrInst(ctxType *ctx, InstructionType instType);
+        antlrcpp::Any visitBrInst(ctxType *ctx, InstOpType instOpType);
 
 };

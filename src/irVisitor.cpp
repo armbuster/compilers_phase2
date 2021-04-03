@@ -338,14 +338,14 @@ antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 }
 
 template <class ctxType>
-antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstructionType instType)
+antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstOpType instOpType)
 {
     std::vector<ProgramValue> lhs; 
     lhs.push_back(visit(ctx->val(2)));
     std::vector<ProgramValue> rhs;
     rhs.push_back(visit(ctx->val(0)));
     rhs.push_back(visit(ctx->val(1)));
-    BinaryInstruction* instr = new BinaryInstruction(instType, lhs, rhs);
+    BinaryInstruction* instr = new BinaryInstruction(instOpType, lhs, rhs);
     instr->setOperands(lhs[0], rhs[0], rhs[1]);
     currentFunction->addInstruction(instr);
 
@@ -353,11 +353,11 @@ antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstructionType instType)
 }
 
 template <class ctxType>
-antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstructionType instType)
+antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstOpType instOpType)
 {
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    BranchInstruction* instr = new BranchInstruction(instType, define, use);
+    BranchInstruction* instr = new BranchInstruction(instOpType, define, use);
     instr->setOperands(ctx->ID()->getText());
     currentFunction->addInstruction(instr);
 
