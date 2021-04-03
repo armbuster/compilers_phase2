@@ -105,5 +105,11 @@
 
         antlrcpp::Any visitLabel(tiger::tigerIrParser::LabelContext *ctx);
 
+     private:
+        template <class ctxType>
+        antlrcpp::Any visitBinInst(ctxType *ctx, InstructionType instType);
+
+        template <class ctxType>
+        antlrcpp::Any visitBrInst(ctxType *ctx, InstructionType instType);
 
 };
