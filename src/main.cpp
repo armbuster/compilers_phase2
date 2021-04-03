@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
 
     tiger::ParseTree * parseTree = new tiger::ParseTree(inputFile);
     
-    parseTree -> visitTree();
-    Module * mod = parseTree->getModule();
+    parseTree->visitTree();
+    Module* mod = parseTree->getModule();
 
     
     // if register allocation strategy is not naive
