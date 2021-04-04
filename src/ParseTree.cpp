@@ -27,11 +27,11 @@ tiger::ParseTree::ParseTree(std::string irFileName_)
 bool tiger::ParseTree::visitTree()
 {
     visitor = new irVisitor();
-    visitor -> visit(tree);
+    visitor->visit(tree);
     return true;
 }
 
 Module * tiger::ParseTree::getModule()
 {
-    return visitor -> getModule();
+    return visitor->getModule();
 }

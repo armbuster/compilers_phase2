@@ -13,13 +13,13 @@
 
 
  class irVisitor : public tiger::tigerIrBaseVisitor {
-     Module * mod;
-     Function * currentFunction;
+     Module* mod;
+     Function* currentFunction;
 
      public:
         irVisitor();
 
-        Module * getModule();
+        Module* getModule();
 
         antlrcpp::Any visitFunction(tiger::tigerIrParser::FunctionContext *ctx);
 
@@ -91,7 +91,6 @@
 
         antlrcpp::Any visitCallr(tiger::tigerIrParser::CallrContext *ctx);
 
-        
         antlrcpp::Any visitArray_store(tiger::tigerIrParser::Array_storeContext *ctx);
 
         antlrcpp::Any visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx);
@@ -106,5 +105,11 @@
 
         antlrcpp::Any visitLabel(tiger::tigerIrParser::LabelContext *ctx);
 
+     private:
+        template <class ctxType>
+        antlrcpp::Any visitBinInst(ctxType *ctx, InstructionType instType);
+
+        template <class ctxType>
+        antlrcpp::Any visitBrInst(ctxType *ctx, InstructionType instType);
 
 };

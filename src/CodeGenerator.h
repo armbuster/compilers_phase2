@@ -1,11 +1,10 @@
 #include "Module.h"
 #include <stack>
 
-
 class CodeGenerator{
-    Module * mod;
+    Module* mod;
     public:
-        CodeGenerator(Module * m);
+        CodeGenerator(Module* m);
 
         // handle main module first
         // calculate how much $sp needs to move down
