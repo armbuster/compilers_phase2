@@ -1,5 +1,5 @@
 #include <string>
-
+#include "Register.h"
 
 enum StorageType {REGISTER, MEMORY};
 
