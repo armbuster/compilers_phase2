@@ -24,7 +24,7 @@ varList : ID arrayDeref COMMA varList # varListExpand
         | # varListEmpty
         ;
 
-arrayDeref : OPENBRACK INTLIT  CLOSEBRACK # arrayDerefNonempty
+arrayDeref : OPENBRACK INTLIT CLOSEBRACK # arrayDerefNonempty
         | # arrayDerefEmpty
         ;
 

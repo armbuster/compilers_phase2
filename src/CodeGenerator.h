@@ -1,26 +1,28 @@
+#pragma once
+
+
 #include "Module.h"
-#include <stack>
+#include "assert.h"
+#include "FunctionWriter.h"
+
+#include <vector>
+#include <string>
+#include <algorithm>
+
 
 
 class CodeGenerator{
-    Module * mod;
+    Module * programModule;
+    std::vector<FunctionWriter*> completeFuncs;
+    FunctionWriter* mainWriter;
+
     public:
         CodeGenerator(Module * m);
-
-        // handle main module first
-        // calculate how much $sp needs to move down
-        // copy $sp -> $fp (main only)
-        // assign each variable an offset from $sp
-        // handle statements 1 by 1
-        // before function call spill all values to their data slot (main only)
         
-
-
-        // abstractions:
-        //  void setupStack()
-        //  
-        //
-        //
+        
+        // find main
+        // call FunctionWriter(main)
+        // call FunctionWriter(f) for rest of functions f
 
 
 };

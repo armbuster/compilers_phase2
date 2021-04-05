@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assert.h"
 #include "Function.h"
 
 
@@ -10,6 +11,7 @@ class Module {
 
     public:
         Function * getFunction(std::string name);
+        std::vector<std::string>* getFunctionNames();
         void addFunction(Function * f);
 
 };

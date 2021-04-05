@@ -5,7 +5,7 @@
 #include <map>
 #include <deque>
 #include <iostream>
-#include "StorageLocation.h"
+#include "Register.h"
 
 enum ValType {VAR, ARRAY, LITERAL, EMPTY};
 enum DataType {FLOAT, INT, VOID, UNKNOWN};
