@@ -7,7 +7,7 @@
 
 class Module {
 
-    std::vector<Function *> functionSeq;
+    std::vector<Function*> functionSeq;
 
     public:
         Function * getFunction(std::string name);

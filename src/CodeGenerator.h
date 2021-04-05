@@ -10,7 +10,6 @@
 #include <algorithm>
 
 
-
 class CodeGenerator{
     Module * programModule;
     std::vector<FunctionWriter*> completeFuncs;

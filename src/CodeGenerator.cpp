@@ -1,7 +1,7 @@
 #include "CodeGenerator.h"
 #include "FunctionWriter.h"
 
-CodeGenerator::CodeGenerator(Module * m)
+CodeGenerator::CodeGenerator(Module* m)
 {
     programModule = m;
     std::vector<std::string>* funcNames = programModule->getFunctionNames();

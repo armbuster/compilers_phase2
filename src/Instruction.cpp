@@ -4,7 +4,7 @@
 
 std::ostream& operator<<(std::ostream& out, const ValType vtype)
 {
-    const char * s=0;
+    const char* s=0;
     #define PROCESS_VAL(p) case(p): s = #p; break;
     switch(vtype)
     {
@@ -19,11 +19,9 @@ std::ostream& operator<<(std::ostream& out, const ValType vtype)
 }
 
 
-
-
 std::ostream& operator<<(std::ostream& out, const InstructionType instr)
 {
-    const char * s=0;
+    const char* s=0;
     #define PROCESS_VAL(p) case(p): s = #p; break;
     switch(instr)
     {
@@ -54,7 +52,6 @@ std::ostream& operator<<(std::ostream& out, const InstructionType instr)
     return out << s;
 }
 
-
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
 {
     out << instr.instruction << ", DEFINE: ";
@@ -66,12 +63,6 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr)
     
     return out;
 }
-
-
-
-
-
-
 
 Instruction::Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
 {
