@@ -69,7 +69,26 @@ Instruction::Instruction(InstructionType instruction_, std::vector<ProgramValue>
     instruction = instruction_;
     define = define_;
     use = use_;
+    registerAssignments = new std::map<std::string, Register *>;
 }
+
+InstructionType Instruction::getInstructionType()
+{
+    return instruction;
+}
+
+std::vector<ProgramValue> Instruction::getDefine()
+{
+    return define;
+}
+
+std::vector<ProgramValue> Instruction::getUse()
+{
+    return use;
+}
+
+
+
 
 void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
 {
@@ -108,4 +127,12 @@ void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_,
     arrayName = arrayName_;
     index = index_;
     value = value_;
+}
+
+
+
+
+std::map<std::string, Register*>* Instruction::getRegisterAssignments()
+{
+    return registerAssignments;
 }

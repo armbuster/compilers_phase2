@@ -3,7 +3,6 @@
 
 #include "Module.h"
 #include "assert.h"
-//#include "FunctionWriter.h"
 #include "Register.h"
 #include "MemoryLocation.h"
 
@@ -36,6 +35,18 @@ class CodeGenerator{
         std::map<std::string, MemoryLocation>* stackSetup(Function* func);
 
         void setGlobalMap(std::map<std::string, MemoryLocation>* varMap);
+        
+        Register getStoreReg(ProgramValue name, Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations);
+        Register getLoadReg(ProgramValue name, Instruction * inst, int defaultRegisterIndex, std::map<std::string, MemoryLocation>* storageLocations);
+        void genInstruction(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+
+        void genAssign(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+
+
+
+        
+        
+        
         
         // find main
         // call FunctionWriter(main)

@@ -51,7 +51,7 @@ class Instruction {
     std::vector<ProgramValue> use; // names of operands that are used here
     std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
-    std::map<std::string, Register *> registerAssignments; // map from variable names to storage locations
+    std::map<std::string, Register *>* registerAssignments; // map from variable names to storage locations
     // This should be set in the treeVisitor. 
     // The register allocator will then use it when building the CFG.
     bool isLeader; // whether or not this instruction is the start of a basic block
@@ -59,27 +59,34 @@ class Instruction {
     public:
         Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
+        
+        InstructionType getInstructionType();
+        std::vector<ProgramValue> getDefine();
+        std::vector<ProgramValue> getUse();
+        std::map<std::string, Register*>* getRegisterAssignments();
+
+
+
 
         //virtual ~Instruction() = 0;
         //virtual void setOperands() = 0;
 };
 
 class BinaryInstruction : public Instruction{
+    public:
     ProgramValue rhs1;
     ProgramValue rhs2;
     ProgramValue lhs;
 
-    public:
         using Instruction::Instruction;
         void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
 };
 
 
 class AssignInstruction : public Instruction{
+    public:
     ProgramValue rhs;
     ProgramValue lhs;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -88,11 +95,10 @@ class AssignInstruction : public Instruction{
 
 
 class BranchInstruction : public Instruction{
+    public:
     ProgramValue lval;
     ProgramValue rval;
     std::string label;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -101,9 +107,8 @@ class BranchInstruction : public Instruction{
 
 
 class ReturnInstruction : public Instruction{
-    ProgramValue returnVal;
-
     public:
+    ProgramValue returnVal;
         
         // inherit constructor
         using Instruction::Instruction;
@@ -112,11 +117,10 @@ class ReturnInstruction : public Instruction{
 
 
 class CallInstruction : public Instruction{
+    public:
     std::deque<ProgramValue> args;
     std::string funcname;
     ProgramValue returnVal;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -126,11 +130,11 @@ class CallInstruction : public Instruction{
 
 
 class ArrayInstruction : public Instruction{
+    
+    public:
     ProgramValue arrayName;
     ProgramValue index;
     ProgramValue value;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;

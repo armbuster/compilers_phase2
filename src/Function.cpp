@@ -7,6 +7,7 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
     floatList = floatList_;
     intList = intList_;
     instr_count = 0;
+    instructions = new std::vector<Instruction*>();
 
     //std::cout << "FUNCTION: " << name << std::endl;
 
@@ -29,7 +30,7 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
 void Function::addInstruction(Instruction * instr)
 {
     //std::cout << *instr << std::endl;
-    instructions.push_back(instr);
+    instructions->push_back(instr);
     instr_count+=1;
 }
 
@@ -46,4 +47,9 @@ std::string Function::getName()
 std::map<std::string, ProgramValue>* Function::getDtypeMap()
 {
     return &dtypeMap;
+}
+
+std::vector<Instruction*>* Function::getInstructions()
+{
+    return instructions;
 }

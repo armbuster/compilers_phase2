@@ -66,6 +66,13 @@ void CodeGenerator::genFunction(Function* func)
     std::map<std::string, MemoryLocation>* storageLocations = stackSetup(func);
     if(func -> getName() == "main")
         setGlobalMap(storageLocations);
+    
+    std::vector<Instruction*>* instructions = func->getInstructions();
+    for(std::vector<Instruction*>::iterator it = instructions->begin(); it != instructions->end(); it++)
+    {
+        genInstruction(*it, storageLocations);
+    }
+
 }
 
 
@@ -75,17 +82,16 @@ void CodeGenerator::setGlobalMap(std::map<std::string, MemoryLocation>* varMap)
     // copy $sp into $fp
     // $fp will stay at the bottom of main's stack frame
     write2Op("move", Register(FP), Register(SP));
+
+    std::map<std::string, MemoryLocation>* globalMap_ = new std::map<std::string, MemoryLocation>();
     
     // change memory location of each variable from being relative to $sp to $fp
     for(std::map<std::string, MemoryLocation>::iterator it = varMap->begin(); it != varMap->end(); it++)
     {
-        it->second = MemoryLocation((it->second).offset, Register(FP));
+        globalMap_->insert(std::make_pair(it->first, MemoryLocation((it->second).offset, Register(FP))));
     }
-    
-    
-    globalMap = varMap;
+    globalMap = globalMap_;
 }
-
 
 
 
@@ -120,4 +126,100 @@ void CodeGenerator::write2Op(std::string mipsOp, op1 operand1, op2 operand2)
 void CodeGenerator::writeLabel(std::string label)
 {
     *outStream << label << ":" << std::endl;
+}
+
+
+void CodeGenerator::genInstruction(Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    InstructionType instType = inst->getInstructionType();
+    if (instType == ASSIGN)
+    {
+        genAssign(inst, storageLocations);
+    }
+
+}
+
+
+Register CodeGenerator::getStoreReg(ProgramValue name, Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    // if name is assigned a register, return assigned register
+    std::map<std::string, Register*>* registerAssignments = inst->getRegisterAssignments();
+    if (registerAssignments->find(name.value) != registerAssignments->end())
+        return *(registerAssignments->at(name.value));
+    
+    // else return $t0
+    else
+    {   
+        if (name.dtype==INT)
+            return Register(T,0);
+        else
+            return Register(F,0);
+
+    }
+        
+}
+
+Register CodeGenerator::getLoadReg(ProgramValue name, Instruction * inst, int defaultRegisterIndex, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    // if name is assigned a register, return assigned register
+    std::map<std::string, Register*>* registerAssignments = inst->getRegisterAssignments();
+    if (registerAssignments->find(name.value) != registerAssignments->end())
+        return *(registerAssignments->at(name.value));
+    
+    // else load variable into default register and return
+    else
+    {
+        // TODO: to handle loads from global memory, we cant assume the variable will always be here
+        
+        if(name.dtype==INT)
+        {
+            MemoryLocation variableLoc = storageLocations->at(name.value);
+            write2Op("lw", Register(T, defaultRegisterIndex), variableLoc);
+            return Register(T, defaultRegisterIndex);
+        }
+        else
+        {
+            MemoryLocation variableLoc = storageLocations->at(name.value);
+            write2Op("l.s", Register(F, defaultRegisterIndex), variableLoc);
+            return Register(F, defaultRegisterIndex);
+        }
+
+    }
+}
+
+
+void CodeGenerator::genAssign(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    AssignInstruction * assignInstr = (AssignInstruction*) instr;
+    ProgramValue lhs = assignInstr->lhs;
+    ProgramValue rhs = assignInstr->rhs;
+    Register storeRegister = getStoreReg(lhs, instr, storageLocations);
+    
+    if(rhs.vtype != LITERAL)
+    {
+        Register loadRegister = getLoadReg(rhs, instr, 1, storageLocations);
+        write2Op("move", storeRegister, loadRegister);
+    }
+    else
+    {
+        if(rhs.dtype == INT)
+            write2Op("li", storeRegister, rhs.value);
+        else if(rhs.dtype == FLOAT)
+            write2Op("li.s", storeRegister, rhs.value);
+        else
+            assert(false);
+
+    }
+
+    if(storeRegister == Register(T,0))
+    {
+        MemoryLocation memLocation = storageLocations->at(lhs.value);
+        write2Op("sw", storeRegister, memLocation);
+    }
+
+    
+
+
+
+
 }
