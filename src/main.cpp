@@ -62,14 +62,30 @@ int main(int argc, char* argv[]) {
     
     parseTree->visitTree();
     Module* mod = parseTree->getModule();
+    
+
+    // for testing, make it easy to switch between stdout and file output
+    std::ostream * out;
+    if(false)
+    {
+        std::ofstream outputFile;
+        outputFile.open(mipsOutputFile, std::ios::out);
+        out = &outputFile;
+    }
+    else
+    {
+        out = &std::cout;
+    }
+
 
     
     // if register allocation strategy is not naive
     /// GARRETS SECTION    
     // CFG cfg(program); // GARRET
 
+
     // END GARRETS SECION
-    CodeGenerator codeGenerator(mod); // ALEX
+    CodeGenerator codeGenerator(mod, out); // ALEX
     return 0;
 
 }

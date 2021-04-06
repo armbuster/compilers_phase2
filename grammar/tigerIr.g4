@@ -150,7 +150,7 @@ NEWLINE : '\n';
 START_FUNCTION : '#start_function' ;
 END_FUNCTION : '#end_function' ;
 
-ID : '_'?[a-zA-Z]([a-zA-Z]|[0-9]|'_')*;
 INTLIT : '0'|[1-9][0-9]*;
+ID : '_'?([a-zA-Z]|[0-9]|'_')+;
 FLOATLIT : ('0'|[1-9][0-9]*)'.'[0-9]*;
 WS : [ \t\b]+ -> skip ;
