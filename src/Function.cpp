@@ -35,5 +35,15 @@ void Function::addInstruction(Instruction * instr)
 
 void Function::addBranchTarget(std::string bTarget)
 {
-    branchTargets[bTarget] = instr_count+1;
+    branchTargets[bTarget] = instr_count;
+}
+
+std::string Function::getName()
+{
+    return name;
+}
+
+std::map<std::string, ProgramValue>* Function::getDtypeMap()
+{
+    return &dtypeMap;
 }

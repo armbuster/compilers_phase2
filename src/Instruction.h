@@ -5,7 +5,7 @@
 #include <map>
 #include <deque>
 #include <iostream>
-#include "StorageLocation.h"
+#include "Register.h"
 
 enum ValType {VAR, ARRAY, LITERAL, EMPTY};
 enum DataType {FLOAT, INT, VOID, UNKNOWN};
@@ -51,7 +51,7 @@ class Instruction {
     std::vector<ProgramValue> use; // names of operands that are used here
     std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
-    std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
+    std::map<std::string, Register *> registerAssignments; // map from variable names to storage locations
     // This should be set in the treeVisitor. 
     // The register allocator will then use it when building the CFG.
     bool isLeader; // whether or not this instruction is the start of a basic block

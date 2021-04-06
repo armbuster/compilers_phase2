@@ -25,5 +25,8 @@ class Function {
         Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_);
         void addInstruction(Instruction* instr);
         void addBranchTarget(std::string label);
+        std::string getName();
+        std::vector<Instruction*>* getInstructions();
+        std::map<std::string, ProgramValue>* getDtypeMap();
 
 };
