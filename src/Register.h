@@ -36,5 +36,5 @@ class Register {
         friend bool operator==(const Register& lhs, const Register& rhs);
         Register(RegisterClass r, int registerIndex=-1);
         //Register(const Register& r);
-        std::string getStringValue();
+        RegisterClass getRegisterClass();
 };

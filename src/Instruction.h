@@ -39,7 +39,8 @@ enum InstructionType {
     CALLR,
     ARRAY_STORE,
     ARRAY_LOAD,
-    ARRAY_ASSIGN
+    ARRAY_ASSIGN,
+    LABEL
 };
 
 
@@ -51,7 +52,9 @@ class Instruction {
     std::vector<ProgramValue> use; // names of operands that are used here
     std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
-    std::map<std::string, Register *>* registerAssignments; // map from variable names to storage locations
+    std::map<std::string, Register*>* registerAssignments; // map from variable names to storage locations
+
+
     // This should be set in the treeVisitor. 
     // The register allocator will then use it when building the CFG.
     bool isLeader; // whether or not this instruction is the start of a basic block
@@ -61,9 +64,12 @@ class Instruction {
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
         
         InstructionType getInstructionType();
-        std::vector<ProgramValue> getDefine();
+        std::vector<ProgramValue> getDefined();
         std::vector<ProgramValue> getUse();
+        bool isUsed(std::string name);
+        bool isDefined(std::string name);
         std::map<std::string, Register*>* getRegisterAssignments();
+        void setRegisterAssignment(std::string, Register*);
 
 
 
@@ -77,9 +83,10 @@ class BinaryInstruction : public Instruction{
     ProgramValue rhs1;
     ProgramValue rhs2;
     ProgramValue lhs;
+    std::string instrType;
 
         using Instruction::Instruction;
-        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
+        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_, InstructionType instrType);
 };
 
 
@@ -103,6 +110,17 @@ class BranchInstruction : public Instruction{
         // inherit constructor
         using Instruction::Instruction;
         void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
+};
+
+
+
+class GotoInstruction : public Instruction{
+    public:
+    std::string label;
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string label);
 };
 
 
@@ -142,3 +160,12 @@ class ArrayInstruction : public Instruction{
 };
 
 
+class LabelInstruction : public Instruction{
+    
+    public:
+    std::string label;
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string label_);
+};

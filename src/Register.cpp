@@ -23,10 +23,10 @@ Register::Register(RegisterClass r, int registerIndex)
     ind = registerIndex;
 }
 
-// Register::Register(const Register& r)
-// {
-
-// }
+RegisterClass Register::getRegisterClass()
+{
+    return R;
+}
 
 
 
@@ -35,6 +35,7 @@ std::map<RegisterClass, std::string> m = {
     {T,"$t"},
     {S,"$s"},
     {V,"$v"},
+    {F,"$f"},
     {SP,"$sp"},
     {RA,"$ra"},
     {FP,"$fp"}

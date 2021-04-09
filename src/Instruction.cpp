@@ -69,7 +69,7 @@ Instruction::Instruction(InstructionType instruction_, std::vector<ProgramValue>
     instruction = instruction_;
     define = define_;
     use = use_;
-    registerAssignments = new std::map<std::string, Register *>;
+    registerAssignments = new std::map<std::string, Register *>();
 }
 
 InstructionType Instruction::getInstructionType()
@@ -77,7 +77,7 @@ InstructionType Instruction::getInstructionType()
     return instruction;
 }
 
-std::vector<ProgramValue> Instruction::getDefine()
+std::vector<ProgramValue> Instruction::getDefined()
 {
     return define;
 }
@@ -88,6 +88,36 @@ std::vector<ProgramValue> Instruction::getUse()
 }
 
 
+bool Instruction::isUsed(std::string name)
+{
+    for(std::vector<ProgramValue>::iterator it = use.begin(); it != use.end(); it++)
+    {
+        if(it->value==name)
+            return true;
+    }
+    return false;
+}
+
+bool Instruction::isDefined(std::string name)
+{
+    for(std::vector<ProgramValue>::iterator it = define.begin(); it != define.end(); it++)
+    {
+        if(it->value==name)
+            return true;
+    }
+    return false;
+}
+
+
+
+// check if name is in define/use for this instruction
+// if so, store the register assignment
+void Instruction::setRegisterAssignment(std::string name, Register* reg)
+{
+
+    if(isDefined(name) || isUsed(name))
+        (*registerAssignments)[name]=reg;
+}
 
 
 void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
@@ -96,19 +126,31 @@ void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
     rhs = rhs_;
 }
 
-void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_)
+void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_, InstructionType instrType_)
 {
     lhs = lhs_;
     rhs1 = rhs1_;
     rhs2 = rhs2_;
+    switch (instrType_)
+    {
+        case ADD: instrType="add"; break;
+        case SUB: instrType="sub"; break;
+        case MULT: instrType="mult"; break;
+        case DIV: instrType="div"; break;
+        case AND: instrType="and"; break;
+        case OR: instrType="or"; break;
+        default: assert(false);
+    }
+
 }
 
 
 
-void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
+void BranchInstruction::setOperands(std::string label_, ProgramValue lval_, ProgramValue rval_)
 {
     lval = lval_;
     rval = rval_;
+    label = label_;
 }
 
 void ReturnInstruction::setOperands(ProgramValue returnVal_)
@@ -119,6 +161,7 @@ void ReturnInstruction::setOperands(ProgramValue returnVal_)
 
 void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval_)
 {
+    funcname = funcname_;
     args = args_;
 }
 
@@ -129,7 +172,15 @@ void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_,
     value = value_;
 }
 
+void GotoInstruction::setOperands(std::string label_)
+{
+    label=label_;
+}
 
+void LabelInstruction::setOperands(std::string label_)
+{
+    label=label_;
+}
 
 
 std::map<std::string, Register*>* Instruction::getRegisterAssignments()
