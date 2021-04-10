@@ -26,7 +26,7 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
 }
 
 
-void Function::addInstruction(Instruction * instr)
+void Function::addInstruction(Instruction* instr)
 {
     //std::cout << *instr << std::endl;
     instructions.push_back(instr);
@@ -35,5 +35,11 @@ void Function::addInstruction(Instruction * instr)
 
 void Function::addBranchTarget(std::string bTarget)
 {
-    branchTargets[bTarget] = instr_count+1;
+    branchTargetsId[bTarget] = instr_count;
+}
+
+void Function::addBranchTarget(std::string labelText, Instruction* inst)
+{
+    std::cout << "Function::addBranchTarget - " << *inst << std::endl;
+    branchTargetsInst.insert( {labelText, inst} );
 }

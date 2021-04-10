@@ -6,6 +6,7 @@
 #include <deque>
 #include <iostream>
 #include <typeinfo>
+#include <stdio.h>
 
 #include "StorageLocation.h"
 
@@ -59,27 +60,27 @@ enum InstType
 
 class Instruction {
 
-    InstOpType instOpType;  //denotes the instruction operation type
-    //std::map<std::string, DataType> operandTypes; // types of operands
-    std::vector<ProgramValue> define; // names of operands that are defined here
-    std::vector<ProgramValue> use; // names of operands that are used here
-    std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
-    std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
-    std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
-    // This should be set in the treeVisitor. 
-    // The register allocator will then use it when building the CFG.
-    bool isLeader; // whether or not this instruction is the start of a basic block
+    protected:
+        InstOpType instOpType;  //denotes the instruction operation type
+        //std::map<std::string, DataType> operandTypes; // types of operands
+        std::vector<ProgramValue> define; // names of operands that are defined here
+        std::vector<ProgramValue> use; // names of operands that are used here
+        std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
+        std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
+        std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
+        // This should be set in the treeVisitor. 
+        // The register allocator will then use it when building the CFG.
+        bool leader; // whether or not this instruction is the start of a basic block
 
     public:
         Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
-        void markAsLeader();
+        void markAsLeader() { leader = true; };
+        bool isLeader() { return leader; };
 
         //pure virtual
         virtual bool is(IR::InstType instType) = 0;
-
-        // template <class instType>
-        // bool is();
+        virtual void print() = 0;
 
         //virtual ~Instruction() = 0;
         //virtual void setOperands() = 0;
@@ -94,6 +95,7 @@ class BinaryInstruction : public Instruction {
     public:
         using Instruction::Instruction; // inherit constructor
         bool is(IR::InstType instType);
+        void print();
         void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
 };
 
@@ -105,6 +107,7 @@ class AssignInstruction : public Instruction {
     public:
         using Instruction::Instruction;
         bool is(IR::InstType instType);
+        void print();
         void setOperands(ProgramValue lhs_, ProgramValue rhs_);
 };
 
@@ -117,6 +120,7 @@ class BranchInstruction : public Instruction {
     public:
         using Instruction::Instruction;
         bool is(IR::InstType instType);
+        void print();
         void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
 };
 
@@ -127,6 +131,7 @@ class ReturnInstruction : public Instruction {
     public:
         using Instruction::Instruction;
         bool is(IR::InstType instType);
+        void print();
         void setOperands(ProgramValue returnVal_ = {EMPTY, UNKNOWN, "", 0});
 };
 
@@ -139,6 +144,7 @@ class CallInstruction : public Instruction {
     public:
         using Instruction::Instruction;
         bool is(IR::InstType instType);
+        void print();
         void setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval = {EMPTY, UNKNOWN, "", 0});
 };
 
@@ -152,6 +158,7 @@ class ArrayInstruction : public Instruction {
     public:
         using Instruction::Instruction;
         bool is(IR::InstType instType);
+        void print();
         void setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_ = {EMPTY, UNKNOWN, "", 0});
 };
 

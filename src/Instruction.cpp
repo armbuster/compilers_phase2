@@ -1,8 +1,220 @@
 #include "Instruction.h"
 
 
+// Forward declarations
+const char* getValueTypeString(const ValType vtype);
+const char* getDataTypeString(const DataType dataType);
+const char* getInstOpTypeString(const InstOpType instOpType);
+std::ostream& operator<<(std::ostream& out, const ValType vtype);
+std::ostream& operator<<(std::ostream& out, const DataType dataType);
+std::ostream& operator<<(std::ostream& out, const InstOpType instOpType);
 
-std::ostream& operator<<(std::ostream& out, const ValType vtype)
+
+Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
+{
+    instOpType = instOpType_;
+    define = define_;
+    use = use_;
+    leader = false;
+}
+
+std::ostream& operator<<(std::ostream& out, const Instruction& instr)
+{
+    out << instr.instOpType << ", DEFINE: ";
+    for(ProgramValue p : instr.define)
+        out << "(" << p.vtype << "," << p.value << ") ";
+    out << "   USE: ";
+    for(ProgramValue p : instr.use)
+        out << "(" << p.vtype << "," << p.value << ") ";
+    
+    return out;
+}
+
+bool AssignInstruction::is(IR::InstType instType)
+{
+    return instType == IR::ASSIGN;
+}
+
+void AssignInstruction::print()
+{
+    printf("ASSIGN: %s %s %s = %s %s %s\n",
+        getDataTypeString(lhs.dtype),
+        getValueTypeString(lhs.vtype),
+        lhs.value.c_str(),
+        getDataTypeString(rhs.dtype),
+        getValueTypeString(rhs.vtype),
+        rhs.value.c_str());
+}
+
+void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
+{
+    lhs = lhs_;
+    rhs = rhs_;
+}
+
+bool BinaryInstruction::is(IR::InstType instType)
+{
+    return instType == IR::BINARY;
+}
+
+void BinaryInstruction::print()
+{
+    printf("BINARY: %s %s %s = %s %s %s, %s, %s %s %s\n",
+        getDataTypeString(lhs.dtype),
+        getValueTypeString(lhs.vtype),
+        lhs.value.c_str(),
+        getDataTypeString(rhs1.dtype),
+        getValueTypeString(rhs1.vtype),
+        rhs1.value.c_str(),
+        getInstOpTypeString(instOpType),
+        getDataTypeString(rhs2.dtype),
+        getValueTypeString(rhs2.vtype),
+        rhs2.value.c_str());
+}
+
+void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_)
+{
+    lhs = lhs_;
+    rhs1 = rhs1_;
+    rhs2 = rhs2_;
+}
+
+bool BranchInstruction::is(IR::InstType instType)
+{
+    return instType == IR::BRANCH;
+}
+
+void BranchInstruction::print()
+{
+    //TODO: this should be able to handle conditional branches
+    printf("BRANCH: %s %s %s, %s, %s %s %s\n",
+        getDataTypeString(lval.dtype),
+        getValueTypeString(lval.vtype),
+        lval.value.c_str(),
+        getInstOpTypeString(instOpType),
+        getDataTypeString(rval.dtype),
+        getValueTypeString(rval.vtype),
+        rval.value.c_str());
+}
+
+void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
+{
+    lval = lval_;
+    rval = rval_;
+}
+
+bool ReturnInstruction::is(IR::InstType instType)
+{
+    return instType == IR::RETURN;
+}
+
+void ReturnInstruction::print()
+{
+    printf("RETURN: %s %s %s\n",
+        getDataTypeString(returnVal.dtype),
+        getValueTypeString(returnVal.vtype),
+        returnVal.value.c_str());
+}
+
+void ReturnInstruction::setOperands(ProgramValue returnVal_)
+{
+    returnVal = returnVal_;
+}
+
+bool CallInstruction::is(IR::InstType instType)
+{
+    return instType == IR::CALL;
+}
+
+void CallInstruction::print()
+{
+    printf("CALL: %s %s = %s(",
+        getDataTypeString(returnVal.dtype),
+        getValueTypeString(returnVal.vtype),
+        funcname.c_str());
+    //print args
+    unsigned int numArgs = args.size();
+    ProgramValue argVal;
+    for (unsigned int arg=0; arg<numArgs; ++arg)
+    {
+        argVal = args.at(arg);
+        // if the last argument
+        if (arg == numArgs-1)
+        {
+            printf("%s %s", 
+                getDataTypeString(argVal.dtype),
+                getValueTypeString(argVal.vtype));
+        }
+        else
+        {
+            printf("%s %s, ", 
+                getDataTypeString(argVal.dtype),
+                getValueTypeString(argVal.vtype));
+        }
+    }
+}
+
+void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue returnVal_)
+{
+    funcname = funcname_;
+    args = args_;
+    returnVal = returnVal_;
+}
+
+bool ArrayInstruction::is(IR::InstType instType)
+{
+    return instType == IR::ARRAY;
+}
+
+void ArrayInstruction::print()
+{
+    if (instOpType==ARRAY_STORE)
+    {
+        printf("ARRAY - STORE: %s %s %s[%s %s %s] = %s %s %s\n",
+            getDataTypeString(arrayName.dtype),
+            getValueTypeString(arrayName.vtype),
+            arrayName.value.c_str(),
+            getDataTypeString(index.dtype),
+            getValueTypeString(index.vtype),
+            index.value.c_str(),
+            getDataTypeString(value.dtype),
+            getValueTypeString(value.vtype),
+            value.value.c_str());
+    }
+    else if (instOpType==ARRAY_LOAD)
+    {
+        printf("ARRAY - LOAD: %s %s %s = %s %s %s[%s %s %s]\n",
+            getDataTypeString(value.dtype),
+            getValueTypeString(value.vtype),
+            value.value.c_str(),
+            getDataTypeString(arrayName.dtype),
+            getValueTypeString(arrayName.vtype),
+            arrayName.value.c_str(),
+            getDataTypeString(index.dtype),
+            getValueTypeString(index.vtype),
+            index.value.c_str());
+    }
+    else //instOpType==ARRAY_ASSIGN
+    {
+        printf("ARRAY - ASSIGN: %s %s %s = %s %s %s\n",
+            getDataTypeString(arrayName.dtype),
+            getValueTypeString(arrayName.vtype),
+            arrayName.value.c_str(),
+            getDataTypeString(value.dtype),
+            getValueTypeString(value.vtype),
+            value.value.c_str());
+    }
+}
+
+void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
+{
+    arrayName = arrayName_;
+    index = index_;
+    value = value_;
+}
+
+// Print helpers
+const char* getValueTypeString(const ValType vtype)
 {
     const char* s=0;
     #define PROCESS_VAL(p) case(p): s = #p; break;
@@ -15,11 +227,26 @@ std::ostream& operator<<(std::ostream& out, const ValType vtype)
     }
 
     #undef PROCESS_VAL
-    return out << s;
+    return s;
 }
 
+const char* getDataTypeString(const DataType dataType)
+{
+    const char* s=0;
+    #define PROCESS_VAL(p) case(p): s = #p; break;
+    switch(dataType)
+    {
+        PROCESS_VAL(FLOAT);
+        PROCESS_VAL(INT);
+        PROCESS_VAL(VOID);
+        PROCESS_VAL(UNKNOWN);
+    }
 
-std::ostream& operator<<(std::ostream& out, const InstOpType instOpType)
+    #undef PROCESS_VAL
+    return s;
+}
+
+const char* getInstOpTypeString(const InstOpType instOpType)
 {
     const char* s=0;
     #define PROCESS_VAL(p) case(p): s = #p; break;
@@ -49,96 +276,20 @@ std::ostream& operator<<(std::ostream& out, const InstOpType instOpType)
     }
 
     #undef PROCESS_VAL
-    return out << s;
+    return s;
 }
 
-std::ostream& operator<<(std::ostream& out, const Instruction& instr)
+std::ostream& operator<<(std::ostream& out, const ValType vtype)
 {
-    out << instr.instOpType << ", DEFINE: ";
-    for(ProgramValue p : instr.define)
-        out << "(" << p.vtype << "," << p.value << ") ";
-    out << "   USE: ";
-    for(ProgramValue p : instr.use)
-        out << "(" << p.vtype << "," << p.value << ") ";
-    
-    return out;
+    return out << getValueTypeString(vtype);
 }
 
-Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
+std::ostream& operator<<(std::ostream& out, const DataType dataType)
 {
-    instOpType = instOpType_;
-    define = define_;
-    use = use_;
-    isLeader = false;
+    return out << getDataTypeString(dataType);
 }
 
-void Instruction::markAsLeader()
+std::ostream& operator<<(std::ostream& out, const InstOpType instOpType)
 {
-    isLeader = true;
-}
-
-bool AssignInstruction::is(IR::InstType instType)
-{
-    return instType == IR::ASSIGN;
-}
-
-void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
-{
-    lhs = lhs_;
-    rhs = rhs_;
-}
-
-bool BinaryInstruction::is(IR::InstType instType)
-{
-    return instType == IR::BINARY;
-}
-
-void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_)
-{
-    lhs = lhs_;
-    rhs1 = rhs1_;
-    rhs2 = rhs2_;
-}
-
-bool BranchInstruction::is(IR::InstType instType)
-{
-    return instType == IR::BRANCH;
-}
-
-void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
-{
-    lval = lval_;
-    rval = rval_;
-}
-
-bool ReturnInstruction::is(IR::InstType instType)
-{
-    return instType == IR::RETURN;
-}
-
-void ReturnInstruction::setOperands(ProgramValue returnVal_)
-{
-    returnVal = returnVal_;
-}
-
-bool CallInstruction::is(IR::InstType instType)
-{
-    return instType == IR::CALL;
-}
-
-void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval_)
-{
-    args = args_;
-}
-
-bool ArrayInstruction::is(IR::InstType instType)
-{
-    return instType == IR::ARRAY;
-}
-
-void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
-{
-    arrayName = arrayName_;
-    index = index_;
-    value = value_;
+    return out << getInstOpTypeString(instOpType);
 }
