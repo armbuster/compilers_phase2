@@ -10,11 +10,14 @@
 #include <map>
 #include <deque>
 #include <vector>
+#include <stdio.h>
 
 
  class irVisitor : public tiger::tigerIrBaseVisitor {
      Module* mod;
      Function* currentFunction;
+     bool isBranchTarget = false;
+     std::string lastLabelText;
 
      public:
         irVisitor();
@@ -111,5 +114,7 @@
 
         template <class ctxType>
         antlrcpp::Any visitBrInst(ctxType *ctx, InstOpType instOpType);
+
+        void isInstBrTarget(Instruction* inst);
 
 };

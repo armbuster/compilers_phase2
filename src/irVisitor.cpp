@@ -150,9 +150,11 @@ antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     lhs.push_back(visit(ctx->val(0)));
     std::vector<ProgramValue> rhs;
     rhs.push_back(visit(ctx->val(1)));
-    AssignInstruction* instr = new AssignInstruction(ASSIGN, lhs, rhs);
-    instr->setOperands(lhs[0], rhs[0]);
-    currentFunction->addInstruction(instr);
+    AssignInstruction* inst = new AssignInstruction(ASSIGN, lhs, rhs);
+    inst->setOperands(lhs[0], rhs[0]);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -225,9 +227,11 @@ antlrcpp::Any irVisitor::visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx)
 antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx){
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    ReturnInstruction* instr = new ReturnInstruction(RETURN_VOID, define, use);
-    instr->setOperands();
-    currentFunction->addInstruction(instr);
+    ReturnInstruction* inst = new ReturnInstruction(RETURN_VOID, define, use);
+    inst->setOperands();
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -236,9 +240,11 @@ antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoi
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define;
     use.push_back(visit(ctx->val()));
-    ReturnInstruction * instr = new ReturnInstruction(RETURN_NONVOID, define, use);
-    instr->setOperands(use[0]);
-    currentFunction->addInstruction(instr);
+    ReturnInstruction * inst = new ReturnInstruction(RETURN_NONVOID, define, use);
+    inst->setOperands(use[0]);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -252,9 +258,11 @@ antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
     {
         use.push_back(p);
     }
-    CallInstruction* instr = new CallInstruction(CALL, define, use);
-    instr->setOperands(funcname, queue);
-    currentFunction->addInstruction(instr);
+    CallInstruction* inst = new CallInstruction(CALL, define, use);
+    inst->setOperands(funcname, queue);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -270,9 +278,11 @@ antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
         use.push_back(p);
     }
     define.push_back(rval);
-    CallInstruction* instr = new CallInstruction(CALL, define, use);
-    instr->setOperands(funcname, queue, rval);
-    currentFunction->addInstruction(instr);
+    CallInstruction* inst = new CallInstruction(CALL, define, use);
+    inst->setOperands(funcname, queue, rval);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -289,9 +299,11 @@ antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeConte
     use.push_back(storeval);
     use.push_back(array);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_STORE, define, use);
-    instr->setOperands(array, storeval, index);
-    currentFunction->addInstruction(instr);
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_STORE, define, use);
+    inst->setOperands(array, storeval, index);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -307,9 +319,11 @@ antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext
     use.push_back(array);
     define.push_back(loadval);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_LOAD, define, use);
-    instr->setOperands(array, loadval, index);
-    currentFunction->addInstruction(instr);
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_LOAD, define, use);
+    inst->setOperands(array, loadval, index);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -324,16 +338,22 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
     use.push_back(storeval);
     define.push_back(array);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_ASSIGN, define, use);
-    instr->setOperands(array, storeval);
-    currentFunction->addInstruction(instr);
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_ASSIGN, define, use);
+    inst->setOperands(array, storeval);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
 
 antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 {
-    currentFunction->addBranchTarget(ctx->ID()->getText());
+    lastLabelText = ctx->ID()->getText();
+    printf("irVisitor::visitLabel - labelText=%s\n", lastLabelText.c_str());
+    currentFunction->addBranchTarget(lastLabelText);
+
+    isBranchTarget = true;
     return 0;
 }
 
@@ -345,9 +365,11 @@ antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstOpType instOpType)
     std::vector<ProgramValue> rhs;
     rhs.push_back(visit(ctx->val(0)));
     rhs.push_back(visit(ctx->val(1)));
-    BinaryInstruction* instr = new BinaryInstruction(instOpType, lhs, rhs);
-    instr->setOperands(lhs[0], rhs[0], rhs[1]);
-    currentFunction->addInstruction(instr);
+    BinaryInstruction* inst = new BinaryInstruction(instOpType, lhs, rhs);
+    inst->setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
 }
@@ -357,9 +379,27 @@ antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstOpType instOpType)
 {
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    BranchInstruction* instr = new BranchInstruction(instOpType, define, use);
-    instr->setOperands(ctx->ID()->getText());
-    currentFunction->addInstruction(instr);
+    BranchInstruction* inst = new BranchInstruction(instOpType, define, use);
+    inst->setOperands(ctx->ID()->getText());
+    currentFunction->addInstruction(inst);
+
+    isInstBrTarget(inst);
 
     return 0;
+}
+
+void irVisitor::isInstBrTarget(Instruction* inst)
+{
+    if (isBranchTarget)
+    {
+        //mark as leader
+        inst->markAsLeader();
+        currentFunction->addBranchTarget(lastLabelText, inst);
+
+        printf("irVisitor::isInstBrTarget - isBranchTarget\n");
+        std::cout << "irVisitor::isInstBrTarget - " << *inst << std::endl;
+        //mark false when done
+        isBranchTarget = false;
+    }
+    
 }
