@@ -39,7 +39,8 @@ enum InstructionType {
     CALLR,
     ARRAY_STORE,
     ARRAY_LOAD,
-    ARRAY_ASSIGN
+    ARRAY_ASSIGN,
+    LABEL
 };
 
 
@@ -51,7 +52,9 @@ class Instruction {
     std::vector<ProgramValue> use; // names of operands that are used here
     std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
-    std::map<std::string, Register *> registerAssignments; // map from variable names to storage locations
+    std::map<std::string, Register*>* registerAssignments; // map from variable names to storage locations
+
+
     // This should be set in the treeVisitor. 
     // The register allocator will then use it when building the CFG.
     bool isLeader; // whether or not this instruction is the start of a basic block
@@ -59,27 +62,38 @@ class Instruction {
     public:
         Instruction(InstructionType instruction_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
+        
+        InstructionType getInstructionType();
+        std::vector<ProgramValue> getDefined();
+        std::vector<ProgramValue> getUse();
+        bool isUsed(std::string name);
+        bool isDefined(std::string name);
+        std::map<std::string, Register*>* getRegisterAssignments();
+        void setRegisterAssignment(std::string, Register*);
+
+
+
 
         //virtual ~Instruction() = 0;
         //virtual void setOperands() = 0;
 };
 
 class BinaryInstruction : public Instruction{
+    public:
     ProgramValue rhs1;
     ProgramValue rhs2;
     ProgramValue lhs;
+    std::string instrType;
 
-    public:
         using Instruction::Instruction;
-        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
+        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_, InstructionType instrType);
 };
 
 
 class AssignInstruction : public Instruction{
+    public:
     ProgramValue rhs;
     ProgramValue lhs;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -88,11 +102,10 @@ class AssignInstruction : public Instruction{
 
 
 class BranchInstruction : public Instruction{
+    public:
     ProgramValue lval;
     ProgramValue rval;
     std::string label;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -100,10 +113,20 @@ class BranchInstruction : public Instruction{
 };
 
 
-class ReturnInstruction : public Instruction{
-    ProgramValue returnVal;
 
+class GotoInstruction : public Instruction{
     public:
+    std::string label;
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string label);
+};
+
+
+class ReturnInstruction : public Instruction{
+    public:
+    ProgramValue returnVal;
         
         // inherit constructor
         using Instruction::Instruction;
@@ -112,11 +135,10 @@ class ReturnInstruction : public Instruction{
 
 
 class CallInstruction : public Instruction{
+    public:
     std::deque<ProgramValue> args;
     std::string funcname;
     ProgramValue returnVal;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -126,11 +148,11 @@ class CallInstruction : public Instruction{
 
 
 class ArrayInstruction : public Instruction{
+    
+    public:
     ProgramValue arrayName;
     ProgramValue index;
     ProgramValue value;
-
-    public:
         
         // inherit constructor
         using Instruction::Instruction;
@@ -138,3 +160,12 @@ class ArrayInstruction : public Instruction{
 };
 
 
+class LabelInstruction : public Instruction{
+    
+    public:
+    std::string label;
+        
+        // inherit constructor
+        using Instruction::Instruction;
+        void setOperands(std::string label_);
+};

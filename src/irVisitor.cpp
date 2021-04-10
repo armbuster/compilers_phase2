@@ -12,6 +12,12 @@ Module* irVisitor::getModule()
 }
 
 
+void irVisitor::updateDtypeMap(std::map<std::string, ProgramValue> * dtypes)
+{
+    dtypeMap.insert(dtypes->begin(), dtypes->end());
+}
+
+
 antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ctx){
 
     // get info about the function
@@ -22,7 +28,8 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     std::deque<ProgramValue> floatList = visit(ctx->varList(1));
     
     // create function object
-    currentFunction = new Function(funcname, dtype, floatList, intList);
+    currentFunction = new Function(funcname, dtype, floatList, intList, params);
+    updateDtypeMap(currentFunction->getDtypeMap());
     visit(ctx->funcBody());
     mod->addFunction(currentFunction);
     return 0;
@@ -109,7 +116,8 @@ antlrcpp::Any irVisitor::visitTypeIdVoid(tiger::tigerIrParser::TypeIdVoidContext
 
 
 antlrcpp::Any irVisitor::visitValId(tiger::tigerIrParser::ValIdContext *ctx){
-    ProgramValue val = {VAR, UNKNOWN, ctx->ID()->getText(), 0};
+    DataType dtype = dtypeMap.at(ctx->ID()->getText()).dtype;
+    ProgramValue val = {VAR, dtype, ctx->ID()->getText(), 0};
     return val;
 }
 
@@ -195,7 +203,12 @@ antlrcpp::Any irVisitor::visitOr_op(tiger::tigerIrParser::Or_opContext *ctx)
 
 antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx)
 {
-    return visitBrInst<tiger::tigerIrParser::Goto_opContext>(ctx, GOTO);
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    GotoInstruction* instr = new GotoInstruction(GOTO, define, use);
+    instr->setOperands(ctx->ID()->getText());
+    currentFunction->addInstruction(instr);
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitBreq(tiger::tigerIrParser::BreqContext *ctx)
@@ -334,7 +347,11 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
 
 antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 {
-    currentFunction->addBranchTarget(ctx->ID()->getText());
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    LabelInstruction* instr = new LabelInstruction(LABEL, define, use);
+    instr->setOperands(ctx->ID()->getText());
+    currentFunction->addInstruction(instr);
     return 0;
 }
 
@@ -347,18 +364,21 @@ antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstructionType instType)
     rhs.push_back(visit(ctx->val(0)));
     rhs.push_back(visit(ctx->val(1)));
     BinaryInstruction* instr = new BinaryInstruction(instType, lhs, rhs);
-    instr->setOperands(lhs[0], rhs[0], rhs[1]);
+    instr->setOperands(lhs[0], rhs[0], rhs[1], instType);
     currentFunction->addInstruction(instr);
     return 0;
 }
+
 
 template <class ctxType>
 antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstructionType instType)
 {
     std::vector<ProgramValue> use;
-    std::vector<ProgramValue> define; 
+    std::vector<ProgramValue> define;
+    use.push_back(visit(ctx->val(0)));
+    use.push_back(visit(ctx->val(1)));
     BranchInstruction* instr = new BranchInstruction(instType, define, use);
-    instr->setOperands(ctx->ID()->getText());
+    instr->setOperands(ctx->ID()->getText(), visit(ctx->val(0)), visit(ctx->val(1)));
     currentFunction->addInstruction(instr);
     return 0;
 }

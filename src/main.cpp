@@ -1,5 +1,7 @@
+#include <fstream>
+#include <iostream>
+
 #include "ParseTree.h"
-//#include "CFG.h"
 #include "CodeGenerator.h"
 
 // CITATION:
@@ -66,11 +68,12 @@ int main(int argc, char* argv[]) {
 
     // for testing, make it easy to switch between stdout and file output
     std::ostream * out;
-    if(false)
+    std::ofstream * outputFile;
+    if(true)
     {
-        std::ofstream outputFile;
-        outputFile.open(mipsOutputFile, std::ios::out);
-        out = &outputFile;
+        outputFile = new std::ofstream();
+        outputFile->open(mipsOutputFile, std::ios::out);
+        out = outputFile;
     }
     else
     {

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "StorageLocation.h"
 #include "assert.h"
 #include <string>
 #include <map>
 #include <iostream>
 
-enum RegisterClass {A, T, S, V, SP, RA, FP};
+enum RegisterClass {A, T, S, V, F, SP, RA, FP};
 // A - argument register
 // T - temporary register
 // S - saved register
 // V - return value registers
+// F - floating point register
 // SP - stack pointer
 // RA - return address
 // FP - frame pointer
@@ -21,7 +21,7 @@ enum RegisterClass {A, T, S, V, SP, RA, FP};
 
 
 
-class Register : public StorageLocation {
+class Register {
     
     RegisterClass R;
     int ind;
@@ -33,7 +33,8 @@ class Register : public StorageLocation {
         // because mips only has 4 argument registers ($a0-$a4)
         // and 9 temporary registers ($t0-$t9)
         friend std::ostream& operator<<(std::ostream& out, const Register& r);
+        friend bool operator==(const Register& lhs, const Register& rhs);
         Register(RegisterClass r, int registerIndex=-1);
         //Register(const Register& r);
-        std::string getStringValue();
+        RegisterClass getRegisterClass();
 };
