@@ -1,5 +1,5 @@
 #include "ParseTree.h"
-//#include "CFG.h"
+#include "CFG.h"
 #include "CodeGenerator.h"
 
 // CITATION:
@@ -62,6 +62,13 @@ int main(int argc, char* argv[]) {
     
     parseTree->visitTree();
     Module* mod = parseTree->getModule();
+
+    for (Function* func : mod->getFunctions())
+    {
+        IR::CFG* cfg = new IR::CFG(func);
+        cfg->build();
+        cfg->print();
+    }
 
     
     // if register allocation strategy is not naive

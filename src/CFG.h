@@ -7,28 +7,34 @@
 #include <stdexcept>
 
 #include "Module.h"
+#include "BasicBlock.h"
 
 
 namespace IR {
 
+typedef std::vector<BasicBlock*> BasicBlockContainer;
+
 class CFG
 {
- private:
- 	Module* module_;
- 	bool isFirstInstruction;
- 	bool isPrevInstructionBr;
-
  public:
- 	CFG(Module*);
+ 	CFG(Function* function);
  	~CFG(){};
 
- 	//TODO: implement this
- 	void printCfg(){};
+ 	void build();
+ 	void print();
 
  private:
- 	bool buildCfg();
- 	bool isFirstInst(Instruction* inst);
- 	bool isPrevInstBr(Instruction* inst);
+ 	Function* function_;
+ 	BasicBlockContainer basicBlocks_;
+ 	bool isFirstInstruction_;
+ 	bool isPrevInstructionBr_;
+ 	unsigned int bbCount_;
+
+ 	bool markIfFirstInst(Instruction* inst);
+ 	bool markIfPrevInstBr(Instruction* inst);
+ 	bool markIfBrTarget(Instruction* inst);
+ 	bool addBasicBlock(BasicBlock* bb);
+ 	bool resolveBasicBlock(BasicBlock* bb);
 };
 
 }  // namespace IR

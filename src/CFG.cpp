@@ -1,66 +1,104 @@
 #include "CFG.h"
 
 
-IR::CFG::CFG(Module* module)
+// Public
+IR::CFG::CFG(Function* function) : bbCount_(0)
 {
-	module_ = module;
-	isFirstInstruction = true;
-	isPrevInstructionBr = false;
-
-	//buildCfg
+	function_ = function;
+	isFirstInstruction_ = true;
+	isPrevInstructionBr_ = false;
+	
 }
 
-bool IR::CFG::buildCfg()
+void IR::CFG::build()
 {
-	// A temp container to hold the instructions for each BB
-	InstContainer* bbInstructions;
-	bool isLeader;
+	BasicBlock* bb = nullptr;
 
-	// Iterate over the instructions in the module
-	for (Function* func : module_->getFunctions())
+	// Iterate over the instructions in the function
+	for ( Instruction* inst : function_->getInstructions() )
 	{
-		for (Instruction* inst : func->getInstructions())
+		// Check the three conditions for an instruction to be a leader
+		markIfFirstInst(inst);
+		markIfPrevInstBr(inst);
+		markIfBrTarget(inst);
+
+		if ( inst->isLeader() )
 		{
-			isLeader = false;
-			isLeader |= isFirstInst(inst);
-			isLeader |= isPrevInstBr(inst);
-			//check if br target.. how to do this??
+			// Resolve the current basic block
+			resolveBasicBlock(bb);
 
-			// If inst is leader
-			//create new BB
-			//	create new BB.. passing bbInstructions as an arg
-			//	clear bbInstructions
-
-			//else... continue to add inst to BB
-			bbInstructions->push_back(inst);
+			// Create a new basic block
+			bb = new BasicBlock();
 		}
+
+		//TODO: if inst is a call... create recursive call to the CFG
+
+		// Add the instruction to the basic block
+		bb->addInstruction(inst);
 	}
 
-	return true;
+	//TODO: add edges between BBs
 }
 
-bool IR::CFG::isFirstInst(Instruction* inst)
+void IR::CFG::print()
 {
-	if (isFirstInstruction)
+	printf("CFG:\n");
+	for (BasicBlock* bb : basicBlocks_)
 	{
-		isFirstInstruction = false;
+		printf("\t");
+		bb->print();
+	}
+	printf("\n");
+}
+
+
+// Private
+bool IR::CFG::markIfFirstInst(Instruction* inst)
+{
+	if (isFirstInstruction_)
+	{
+		isFirstInstruction_ = false;
 		inst->markAsLeader();
 		return true;
 	}
 	return false;
 }
 
-bool IR::CFG::isPrevInstBr(Instruction* inst)
+bool IR::CFG::markIfPrevInstBr(Instruction* inst)
 {
-	if (isPrevInstructionBr)
+	if (isPrevInstructionBr_)
 	{
 		inst->markAsLeader();
-		isPrevInstructionBr = false;
+		isPrevInstructionBr_ = false;
 		return true;
 	}
 	if ( inst->is(IR::InstType::BRANCH) )
 	{
-		isPrevInstructionBr = true;
+		isPrevInstructionBr_ = true;
 	}
 	return false;
+}
+
+bool IR::CFG::markIfBrTarget(Instruction* inst)
+{
+	// Branch targets marked as leaders in the irVisitor class
+	return inst->isLeader();
+}
+
+bool IR::CFG::addBasicBlock(BasicBlock* bb)
+{
+	bb->setCfgId(bbCount_);
+	basicBlocks_.push_back(bb);
+	bbCount_ += 1;
+	return true;
+}
+
+bool IR::CFG::resolveBasicBlock(BasicBlock* bb)
+{
+	if ( bb==nullptr )
+	{
+		return false;
+	}
+	addBasicBlock(bb);
+	return true;
 }
