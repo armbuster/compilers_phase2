@@ -46,16 +46,25 @@ enum InstOpType
 };
 
 namespace IR {
-enum InstType
-{
-    BINARY,
-    ASSIGN,
-    BRANCH,
-    RETURN,
-    CALL,
-    ARRAY
-};
+    // Forward declaration
+    class BasicBlock;
+
+    enum InstType
+    {
+        BINARY,
+        ASSIGN,
+        BRANCH,
+        RETURN,
+        CALL,
+        ARRAY
+    };
 }; //end namespace IR
+
+// Forward declaration
+class Instruction;
+
+
+typedef std::vector<Instruction*> InstContainer;
 
 
 class Instruction {
@@ -68,22 +77,33 @@ class Instruction {
         std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
         std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
         std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
-        // This should be set in the treeVisitor. 
-        // The register allocator will then use it when building the CFG.
         bool leader; // whether or not this instruction is the start of a basic block
+        bool branchTarget;
+        IR::BasicBlock* bb;
+        InstContainer* successors = new InstContainer();
+        InstContainer* predecessors = new InstContainer();
+        unsigned int id_;
 
     public:
         Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
+        void addSuccessor(Instruction* successor);
+        void addPredecessor(Instruction* predecessor);
+        void printSuccessors();
+        void printPredecessors();
+
+        InstContainer* getSuccessors();
+        InstContainer* getPredecessors();
+        void setId(unsigned int id) { id_ = id; }
+        unsigned int getId() { return id_; }
         void markAsLeader() { leader = true; };
         bool isLeader() { return leader; };
+        void isBranchTarget(bool brTarget) { branchTarget = brTarget; }
+        bool isBranchTarget() { return branchTarget; }
 
         //pure virtual
         virtual bool is(IR::InstType instType) = 0;
         virtual void print() = 0;
-
-        //virtual ~Instruction() = 0;
-        //virtual void setOperands() = 0;
 };
 
 

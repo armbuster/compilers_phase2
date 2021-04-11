@@ -16,6 +16,35 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
     define = define_;
     use = use_;
     leader = false;
+    branchTarget = false;
+}
+
+void Instruction::addSuccessor(Instruction* successor)
+{
+    successors->push_back(successor);
+}
+
+void Instruction::addPredecessor(Instruction* predecessor)
+{
+    predecessors->push_back(predecessor);
+}
+
+void Instruction::printSuccessors()
+{
+    printf("Successors: ");
+    for (Instruction* inst : *successors)
+    {
+        printf("%d ", inst->getId());
+    }
+}
+
+void Instruction::printPredecessors()
+{
+    printf("Predecessors: ");
+    for (Instruction* inst : *predecessors)
+    {
+        printf("%d ", inst->getId());
+    }
 }
 
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
@@ -37,13 +66,17 @@ bool AssignInstruction::is(IR::InstType instType)
 
 void AssignInstruction::print()
 {
-    printf("ASSIGN: %s %s %s = %s %s %s\n",
+    printf("ID: %d ", id_);
+    printf("ASSIGN: %s %s %s = %s %s %s ",
         getDataTypeString(lhs.dtype),
         getValueTypeString(lhs.vtype),
         lhs.value.c_str(),
         getDataTypeString(rhs.dtype),
         getValueTypeString(rhs.vtype),
         rhs.value.c_str());
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
@@ -59,7 +92,8 @@ bool BinaryInstruction::is(IR::InstType instType)
 
 void BinaryInstruction::print()
 {
-    printf("BINARY: %s %s %s = %s %s %s, %s, %s %s %s\n",
+    printf("ID: %d ", id_);
+    printf("BINARY: %s %s %s = %s %s %s, %s, %s %s %s ",
         getDataTypeString(lhs.dtype),
         getValueTypeString(lhs.vtype),
         lhs.value.c_str(),
@@ -70,6 +104,9 @@ void BinaryInstruction::print()
         getDataTypeString(rhs2.dtype),
         getValueTypeString(rhs2.vtype),
         rhs2.value.c_str());
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_)
@@ -86,8 +123,9 @@ bool BranchInstruction::is(IR::InstType instType)
 
 void BranchInstruction::print()
 {
+    printf("ID: %d ", id_);
     //TODO: this should be able to handle conditional branches
-    printf("BRANCH: %s %s %s, %s, %s %s %s\n",
+    printf("BRANCH: %s %s %s, %s, %s %s %s ",
         getDataTypeString(lval.dtype),
         getValueTypeString(lval.vtype),
         lval.value.c_str(),
@@ -95,6 +133,9 @@ void BranchInstruction::print()
         getDataTypeString(rval.dtype),
         getValueTypeString(rval.vtype),
         rval.value.c_str());
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
@@ -110,10 +151,14 @@ bool ReturnInstruction::is(IR::InstType instType)
 
 void ReturnInstruction::print()
 {
-    printf("RETURN: %s %s %s\n",
+    printf("ID: %d ", id_);
+    printf("RETURN: %s %s %s ",
         getDataTypeString(returnVal.dtype),
         getValueTypeString(returnVal.vtype),
         returnVal.value.c_str());
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void ReturnInstruction::setOperands(ProgramValue returnVal_)
@@ -128,6 +173,7 @@ bool CallInstruction::is(IR::InstType instType)
 
 void CallInstruction::print()
 {
+    printf("ID: %d ", id_);
     printf("CALL: %s %s = %s(",
         getDataTypeString(returnVal.dtype),
         getValueTypeString(returnVal.vtype),
@@ -152,6 +198,9 @@ void CallInstruction::print()
                 getValueTypeString(argVal.vtype));
         }
     }
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue returnVal_)
@@ -168,9 +217,10 @@ bool ArrayInstruction::is(IR::InstType instType)
 
 void ArrayInstruction::print()
 {
+    printf("ID: %d ", id_);
     if (instOpType==ARRAY_STORE)
     {
-        printf("ARRAY - STORE: %s %s %s[%s %s %s] = %s %s %s\n",
+        printf("ARRAY - STORE: %s %s %s[%s %s %s] = %s %s %s ",
             getDataTypeString(arrayName.dtype),
             getValueTypeString(arrayName.vtype),
             arrayName.value.c_str(),
@@ -204,6 +254,9 @@ void ArrayInstruction::print()
             getValueTypeString(value.vtype),
             value.value.c_str());
     }
+    printSuccessors();
+    printPredecessors();
+    printf("\n");
 }
 
 void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
