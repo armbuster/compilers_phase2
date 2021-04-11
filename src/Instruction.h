@@ -79,7 +79,7 @@ class Instruction {
         std::map<std::string, StorageLocation *> storageLocations; // map from variable names to storage locations
         bool leader; // whether or not this instruction is the start of a basic block
         bool branchTarget;
-        IR::BasicBlock* bb;
+        IR::BasicBlock* parent_;
         InstContainer* successors = new InstContainer();
         InstContainer* predecessors = new InstContainer();
         unsigned int id_;
@@ -100,6 +100,8 @@ class Instruction {
         bool isLeader() { return leader; };
         void isBranchTarget(bool brTarget) { branchTarget = brTarget; }
         bool isBranchTarget() { return branchTarget; }
+        void setParent(IR::BasicBlock* parent); { parent_ = parent; }
+        IR::BasicBlock* getParent() { return parent_; }
 
         //pure virtual
         virtual bool is(IR::InstType instType) = 0;
