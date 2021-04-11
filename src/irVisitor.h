@@ -14,10 +14,14 @@
 
 
  class irVisitor : public tiger::tigerIrBaseVisitor {
-     Module* mod;
-     Function* currentFunction;
-     bool isBranchTarget = false;
-     std::string lastLabelText;
+     private:
+        Module* mod;
+        Function* currentFunction;
+        bool isBranchTarget = false;
+        std::string lastLabelText;
+        Instruction* prevInst = nullptr;
+        unsigned int instId = 0;
+        bool lastVisitedLabel = false;
 
      public:
         irVisitor();
@@ -116,5 +120,11 @@
         antlrcpp::Any visitBrInst(ctxType *ctx, InstOpType instOpType);
 
         void isInstBrTarget(Instruction* inst);
+
+        void updatePrevInst(Instruction* nextInst);
+
+        void updateInstId(Instruction* inst);
+
+        void checkIfFollowingLabel(Instruction* inst);
 
 };

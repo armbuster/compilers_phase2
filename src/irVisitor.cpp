@@ -154,7 +154,10 @@ antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     inst->setOperands(lhs[0], rhs[0]);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -231,7 +234,10 @@ antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidConte
     inst->setOperands();
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -244,7 +250,10 @@ antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoi
     inst->setOperands(use[0]);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -262,7 +271,10 @@ antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
     inst->setOperands(funcname, queue);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -282,7 +294,10 @@ antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
     inst->setOperands(funcname, queue, rval);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -303,7 +318,10 @@ antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeConte
     inst->setOperands(array, storeval, index);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -323,7 +341,10 @@ antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext
     inst->setOperands(array, loadval, index);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -342,7 +363,10 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
     inst->setOperands(array, storeval);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -354,6 +378,7 @@ antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
     currentFunction->addBranchTarget(lastLabelText);
 
     isBranchTarget = true;
+    lastVisitedLabel = true;
     return 0;
 }
 
@@ -369,7 +394,10 @@ antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstOpType instOpType)
     inst->setOperands(lhs[0], rhs[0], rhs[1]);
     currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
 
     return 0;
 }
@@ -380,10 +408,20 @@ antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstOpType instOpType)
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
     BranchInstruction* inst = new BranchInstruction(instOpType, define, use);
-    inst->setOperands(ctx->ID()->getText());
+
+    std::string targetLabel = ctx->ID()->getText();
+    inst->setOperands(targetLabel);
     currentFunction->addInstruction(inst);
 
+    printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
+    currentFunction->addBranchSrc(targetLabel, inst);
+    updateInstId(inst);
     isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    // If this is a branch inst the next will be the target
+    isBranchTarget = true;
 
     return 0;
 }
@@ -392,14 +430,48 @@ void irVisitor::isInstBrTarget(Instruction* inst)
 {
     if (isBranchTarget)
     {
+        printf("irVisitor::isInstBrTarget - isBranchTarget\n");
+        
         //mark as leader
         inst->markAsLeader();
+        inst->isBranchTarget(true);
         currentFunction->addBranchTarget(lastLabelText, inst);
-
-        printf("irVisitor::isInstBrTarget - isBranchTarget\n");
-        std::cout << "irVisitor::isInstBrTarget - " << *inst << std::endl;
+        
         //mark false when done
         isBranchTarget = false;
     }
     
+}
+
+void irVisitor::updatePrevInst(Instruction* nextInst)
+{
+    if (prevInst != nullptr)
+    {
+        prevInst->addSuccessor(nextInst);
+        nextInst->addPredecessor(prevInst);
+    }
+    //update for next call
+    prevInst = nextInst;
+}
+
+void irVisitor::updateInstId(Instruction* inst)
+{
+    inst->setId(instId);
+    instId += 1;
+}
+
+void irVisitor::checkIfFollowingLabel(Instruction* inst)
+{
+    Instruction* brSrcInst = nullptr;
+
+    if (lastVisitedLabel)
+    {
+        brSrcInst = currentFunction->getBrSrcInst(lastLabelText);
+        if (brSrcInst != nullptr) //getBrSrcInst() can return nullptr
+        {
+            brSrcInst->addSuccessor(inst);
+            inst->addPredecessor(inst);
+        }
+        lastVisitedLabel = false; //make sure this only happens once
+    }
 }
