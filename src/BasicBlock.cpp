@@ -5,15 +5,14 @@ IR::BasicBlock::BasicBlock()
 
 bool IR::BasicBlock::addInstruction(Instruction* inst)
 {
-	instructions_.push_back(inst);
+	instructions_->push_back(inst);
 	return true;
 }
 
 void IR::BasicBlock::print()
 {
-	printf("BasicBlock:\n");
-	printf("\t cfgId_=%d\n", cfgId_);
-	for (Instruction* inst : instructions_)
+	printf("BasicBlock: ID: %d\n", id_);
+	for (Instruction* inst : *instructions_)
 	{
 		printf("\t\t");
 		inst->print();

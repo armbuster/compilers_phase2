@@ -21,12 +21,12 @@ class BasicBlock
  	bool addInstruction(Instruction* inst);
  	void print();
 
- 	void setCfgId(unsigned int cfgId) { cfgId_ = cfgId; };
- 	unsigned int getCfgId() { return cfgId_; };
+ 	void setId(unsigned int id) { id_ = id; };
+ 	unsigned int getId() { return id_; };
 
  private:
- 	InstContainer instructions_;
- 	unsigned int cfgId_;
+ 	InstContainer* instructions_ = new InstContainer();
+ 	unsigned int id_;
  	std::vector<ProgramValue> inSet_; 	// in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> outSet_; 	// out set - UPDATED BY LIVELINESS ANALYSIS
 
