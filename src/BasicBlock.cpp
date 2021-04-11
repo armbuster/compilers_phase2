@@ -9,6 +9,16 @@ bool IR::BasicBlock::addInstruction(Instruction* inst)
 	return true;
 }
 
+void IR::BasicBlock::addSuccessor(BasicBlock* bb)
+{
+	successors_->push_back(bb);
+}
+
+void IR::BasicBlock::addPredecessor(BasicBlock* bb)
+{
+	predecessors_->push_back(bb);
+}
+
 void IR::BasicBlock::print()
 {
 	printf("BasicBlock: ID: %d\n", id_);
