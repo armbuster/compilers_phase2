@@ -29,7 +29,7 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
 void Function::addInstruction(Instruction* instr)
 {
     //std::cout << *instr << std::endl;
-    instructions.push_back(instr);
+    instructions->push_back(instr);
     instr_count+=1;
 }
 
@@ -38,8 +38,30 @@ void Function::addBranchTarget(std::string bTarget)
     branchTargetsId[bTarget] = instr_count;
 }
 
-void Function::addBranchTarget(std::string labelText, Instruction* inst)
+void Function::addBranchTarget(std::string labelText, Instruction* targetInst)
 {
-    std::cout << "Function::addBranchTarget - " << *inst << std::endl;
-    branchTargetsInst.insert( {labelText, inst} );
+    std::cout << "Function::addBranchTarget" << std::endl;
+    brLabelToTargetInst->insert( {labelText, targetInst} );
+    //toFromBrInst.insert( {} )
+}
+
+void Function::addBranchSrc(std::string labelText, Instruction* srcInst)
+{
+    std::cout << "Function::addBranchSrc" << std::endl;
+    brLabelToSrcInst->insert( {labelText, srcInst} );
+}
+
+Instruction* Function::getBrSrcInst(std::string label)
+{
+    std::cout << "Function::getBrSrcInst" << std::endl;
+    // If value exists
+    if ( brLabelToSrcInst->find(label) == brLabelToSrcInst->end() )
+    {
+        return nullptr;
+    }
+    else
+    {
+        std::cout << "Function::getBrSrcInst - here" << std::endl;
+        return brLabelToSrcInst->at(label);
+    }
 }
