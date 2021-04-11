@@ -30,7 +30,7 @@ void Function::addInstruction(Instruction* instr)
 {
     //std::cout << *instr << std::endl;
     instructions->push_back(instr);
-    instr_count+=1;
+    ++instr_count;
 }
 
 void Function::addBranchTarget(std::string bTarget)
@@ -54,7 +54,7 @@ void Function::addBranchSrc(std::string labelText, Instruction* srcInst)
 Instruction* Function::getBrSrcInst(std::string label)
 {
     std::cout << "Function::getBrSrcInst" << std::endl;
-    // If value exists
+    // If key/label DNE
     if ( brLabelToSrcInst->find(label) == brLabelToSrcInst->end() )
     {
         return nullptr;

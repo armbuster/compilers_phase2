@@ -457,7 +457,7 @@ void irVisitor::updatePrevInst(Instruction* nextInst)
 void irVisitor::updateInstId(Instruction* inst)
 {
     inst->setId(instId);
-    instId += 1;
+    ++instId;
 }
 
 void irVisitor::checkIfFollowingLabel(Instruction* inst)
