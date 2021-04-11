@@ -15,7 +15,7 @@ void IR::CFG::build()
 	BasicBlock* bb = nullptr;
 
 	// Iterate over the instructions in the function
-	for ( Instruction* inst : function_->getInstructions() )
+	for ( Instruction* inst : *function_->getInstructions() )
 	{
 		// Check the three conditions for an instruction to be a leader
 		markIfFirstInst(inst);
@@ -36,6 +36,9 @@ void IR::CFG::build()
 		// Add the instruction to the basic block
 		bb->addInstruction(inst);
 	}
+
+	// Resolve the last basic block
+	resolveBasicBlock(bb);
 
 	//TODO: add edges between BBs
 }
@@ -87,7 +90,7 @@ bool IR::CFG::markIfBrTarget(Instruction* inst)
 
 bool IR::CFG::addBasicBlock(BasicBlock* bb)
 {
-	bb->setCfgId(bbCount_);
+	bb->setId(bbCount_);
 	basicBlocks_.push_back(bb);
 	bbCount_ += 1;
 	return true;
