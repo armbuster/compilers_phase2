@@ -27,8 +27,8 @@ class Instruction {
         bool leader; // whether or not this instruction is the start of a basic block
         bool branchTarget;
         IR::BasicBlock* parent_;
-        InstContainer* successors = new InstContainer();
-        InstContainer* predecessors = new InstContainer();
+        InstContainer* successors_ = new InstContainer();
+        InstContainer* predecessors_ = new InstContainer();
         unsigned int id_;
 
     public:
@@ -39,9 +39,8 @@ class Instruction {
         void printSuccessors();
         void printPredecessors();
         void printParent();
+        BasicBlockContainer* getSuccessorsParents();
 
-        InstContainer* getSuccessors();
-        InstContainer* getPredecessors();
         void setId(unsigned int id) { id_ = id; }
         unsigned int getId() { return id_; }
         void markAsLeader() { leader = true; };

@@ -21,18 +21,18 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
 
 void Instruction::addSuccessor(Instruction* successor)
 {
-    successors->push_back(successor);
+    successors_->push_back(successor);
 }
 
 void Instruction::addPredecessor(Instruction* predecessor)
 {
-    predecessors->push_back(predecessor);
+    predecessors_->push_back(predecessor);
 }
 
 void Instruction::printSuccessors()
 {
     printf("Successors: ");
-    for (Instruction* inst : *successors)
+    for (Instruction* inst : *successors_)
     {
         printf("%d ", inst->getId());
     }
@@ -41,7 +41,7 @@ void Instruction::printSuccessors()
 void Instruction::printPredecessors()
 {
     printf("Predecessors: ");
-    for (Instruction* inst : *predecessors)
+    for (Instruction* inst : *predecessors_)
     {
         printf("%d ", inst->getId());
     }
@@ -49,7 +49,24 @@ void Instruction::printPredecessors()
 
 void Instruction::printParent()
 {
-    printf("ParentBasicBlock: %d\n", parent_->getId());
+    printf("ParentBasicBlock: %d", parent_->getId());
+}
+
+BasicBlockContainer* Instruction::getSuccessorsParents()
+{
+    BasicBlockContainer* successorsParents = new BasicBlockContainer();
+    IR::BasicBlock* nextParent = nullptr;
+
+    for (Instruction* nextInst : *successors_)
+    {
+        nextParent = nextInst->getParent();
+        // If the parents of this and next are not equal, an edge is needed
+        if (nextParent != parent_)
+        {
+            successorsParents->push_back(nextParent);
+        }
+    }
+    return successorsParents;
 }
 
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
@@ -81,6 +98,7 @@ void AssignInstruction::print()
         rhs.value.c_str());
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 
@@ -111,6 +129,7 @@ void BinaryInstruction::print()
         rhs2.value.c_str());
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 
@@ -140,6 +159,7 @@ void BranchInstruction::print()
         rval.value.c_str());
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 
@@ -163,6 +183,7 @@ void ReturnInstruction::print()
         returnVal.value.c_str());
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 
@@ -205,6 +226,7 @@ void CallInstruction::print()
     }
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 
@@ -261,6 +283,7 @@ void ArrayInstruction::print()
     }
     printSuccessors();
     printPredecessors();
+    printParent();
     printf("\n");
 }
 

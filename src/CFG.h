@@ -13,8 +13,6 @@
 
 namespace IR {
 
-typedef std::vector<BasicBlock*> BasicBlockContainer;
-
 class CFG
 {
  public:

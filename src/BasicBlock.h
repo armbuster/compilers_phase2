@@ -15,9 +15,7 @@ class Instruction;
 
 namespace IR {
 
-class BasicBlock;
 
-typedef std::vector<BasicBlock*> BasicBlockContainer;
 
 class BasicBlock
 {
@@ -32,6 +30,8 @@ class BasicBlock
 
  	void setId(unsigned int id) { id_ = id; };
  	unsigned int getId() { return id_; };
+ 	InstContainer* getInstructions() { return instructions_; }
+ 	void setSuccessors(BasicBlockContainer* successors) { successors_ = successors; }
 
  private:
  	InstContainer* instructions_ = new InstContainer();
@@ -40,6 +40,8 @@ class BasicBlock
  	unsigned int id_;
  	std::vector<ProgramValue> inSet_; 	// in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> outSet_; 	// out set - UPDATED BY LIVELINESS ANALYSIS
+
+    void printSuccessors();
 
 
 };

@@ -28,4 +28,17 @@ void IR::BasicBlock::print()
 		printf("\t\t");
 		inst->print();
 	}
+	printSuccessors();
+	printf("\n\n");
+}
+
+// Private
+void IR::BasicBlock::printSuccessors()
+{
+	printf("\t");
+	printf("BasicBlockSuccessors: ");
+	for (BasicBlock* successor : *successors_)
+	{
+		printf("%d ", successor->getId());
+	}
 }

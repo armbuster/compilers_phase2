@@ -42,7 +42,8 @@ void IR::CFG::build()
 	// Resolve the last basic block
 	resolveBasicBlock(bb);
 
-	//TODO: add edges between BBs
+	// Add edges between BBs
+	addEdges();
 }
 
 void IR::CFG::print()
@@ -110,9 +111,22 @@ bool IR::CFG::resolveBasicBlock(BasicBlock* bb)
 
 void IR::CFG::addEdges()
 {
+	BasicBlockContainer* otherParents;
+
 	for (BasicBlock* bb : basicBlocks_)
 	{
-
+		for (Instruction* inst : *bb->getInstructions())
+		{
+			otherParents = inst->getSuccessorsParents();
+			if ( otherParents->empty() )
+			{
+				continue;
+			}
+			else //add forward edges
+			{
+				bb->setSuccessors(otherParents);
+			}
+		}
 	}
 
 
