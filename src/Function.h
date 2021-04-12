@@ -5,15 +5,11 @@
 #include <vector>
 #include <deque>
 #include <iostream>
+#include <map>
 #include <unordered_map>
 
-#include "Instruction.h"
-
-class Function; //used in typedefs
-
-typedef std::vector<Function*> FunctionContainer;
-typedef std::unordered_map<std::string, Instruction*> InstByStringMap;
-typedef std::unordered_map<Instruction*, Instruction*> InstByInstMap;
+#include "IrEnums.h"
+#include "typedefs.h"
 
 class Function {
     std::string name;

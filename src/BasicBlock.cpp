@@ -1,6 +1,7 @@
 #include "BasicBlock.h"
+#include "Instruction.h"
 
-IR::BasicBlock::BasicBlock()
+IR::BasicBlock::BasicBlock() : id_(0)
 {}
 
 bool IR::BasicBlock::addInstruction(Instruction* inst)

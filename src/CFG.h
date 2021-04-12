@@ -6,7 +6,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "Module.h"
+#include "IrEnums.h"
+#include "typedefs.h"
 #include "BasicBlock.h"
 
 
@@ -35,6 +36,7 @@ class CFG
  	bool markIfBrTarget(Instruction* inst);
  	bool addBasicBlock(BasicBlock* bb);
  	bool resolveBasicBlock(BasicBlock* bb);
+ 	void addEdges();
 };
 
 }  // namespace IR

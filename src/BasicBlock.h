@@ -7,8 +7,11 @@
 #include <stdexcept>
 #include <vector>
 
-#include "Function.h"
-#include "Instruction.h"
+#include "IrEnums.h"
+#include "typedefs.h"
+
+class Instruction;
+
 
 namespace IR {
 

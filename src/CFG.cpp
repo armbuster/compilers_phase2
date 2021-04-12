@@ -1,5 +1,6 @@
 #include "CFG.h"
-
+#include "Function.h"
+#include "Instruction.h"
 
 // Public
 IR::CFG::CFG(Function* function) : bbCount_(0)
@@ -35,6 +36,7 @@ void IR::CFG::build()
 
 		// Add the instruction to the basic block
 		bb->addInstruction(inst);
+		inst->setParent(bb);
 	}
 
 	// Resolve the last basic block
@@ -104,4 +106,14 @@ bool IR::CFG::resolveBasicBlock(BasicBlock* bb)
 	}
 	addBasicBlock(bb);
 	return true;
+}
+
+void IR::CFG::addEdges()
+{
+	for (BasicBlock* bb : basicBlocks_)
+	{
+
+	}
+
+
 }

@@ -47,6 +47,11 @@ void Instruction::printPredecessors()
     }
 }
 
+void Instruction::printParent()
+{
+    printf("ParentBasicBlock: %d\n", parent_->getId());
+}
+
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
 {
     out << instr.instOpType << ", DEFINE: ";
