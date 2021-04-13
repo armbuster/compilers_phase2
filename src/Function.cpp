@@ -11,22 +11,22 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
     instructions = new std::vector<Instruction*>();
     argumentRegisters = new std::map<std::string, Register*>();
 
-    //std::cout << "FUNCTION: " << name << std::endl;
-
+    
+    ////// keep this
     for(int i = 0; i < floatList.size(); i++)
     {
         //std::cout << name_ <<": adding " << floatList[i].value << "to floatlist" << std::endl;
         floatList[i].dtype = FLOAT;
         dtypeMap[floatList[i].value] = floatList[i];
     }
-     
+    ////// keep this
     for(int i = 0; i < intList.size(); i++)
     {
         //std::cout << name_ <<": adding " << intList[i].value << "to intlist" << std::endl;
         intList[i].dtype = INT;
         dtypeMap[intList[i].value] = intList[i];
     }
-
+    ////// keep this
     for(int i=0; i < params.size(); i++)
     {
         std::string p = params[i];
@@ -37,7 +37,7 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
 
 }
 
-
+////// keep this
 void Function::addInstruction(Instruction * instr)
 {
     for(std::map<std::string, Register*>::iterator it = argumentRegisters->begin(); it != argumentRegisters->end(); it++)
@@ -49,26 +49,31 @@ void Function::addInstruction(Instruction * instr)
     instr_count+=1;
 }
 
+////// keep this
 void Function::addBranchTarget(std::string bTarget)
 {
     branchTargets[bTarget] = instr_count;
 }
 
+////// keep this
 std::string Function::getName()
 {
     return funcName;
 }
 
+////// keep this
 std::map<std::string, ProgramValue>* Function::getDtypeMap()
 {
     return &dtypeMap;
 }
 
+////// keep this
 std::vector<Instruction*>* Function::getInstructions()
 {
     return instructions;
 }
 
+////// keep this
 ProgramValue Function::getDtype(std::string name)
 {
     return dtypeMap.at(name);

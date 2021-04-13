@@ -113,10 +113,10 @@ bool Instruction::isDefined(std::string name)
 
 // check if name is in define/use for this instruction
 // if so, store the register assignment
+// keep this
 void Instruction::setRegisterAssignment(std::string name, Register* reg)
 {
 
-    //if(isDefined(name) || isUsed(name))
         (*registerAssignments)[name]=reg;
 }
 
@@ -184,7 +184,7 @@ void LabelInstruction::setOperands(std::string label_)
     label=label_;
 }
 
-
+////// keep these
 std::map<std::string, Register*>* Instruction::getRegisterAssignments()
 {
     return registerAssignments;
