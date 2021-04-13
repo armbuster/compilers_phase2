@@ -37,9 +37,9 @@ int main(int argc, char* argv[]) {
     //     tokens_code=0;
 
     // read input file
-    if (optionExists(argv, argv+argc, "-i"))
+    if (optionExists(argv, argv+argc, "-r"))
     {
-        inputFile = getOption(argv, argv+argc, "-i");
+        inputFile = getOption(argv, argv+argc, "-r");
         std::string ext = ".ir";
         if (inputFile.size() > ext.size() &&
             inputFile.substr(inputFile.size() - ext.size()) == ".ir")

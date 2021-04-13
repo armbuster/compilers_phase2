@@ -75,6 +75,8 @@ antlrcpp::Any irVisitor::visitVarListExpand(tiger::tigerIrParser::VarListExpandC
         vtype=VAR;
     else if(size > 0)
         vtype=ARRAY;
+    else
+        assert(false);
 
     ProgramValue pval = {vtype, UNKNOWN, ctx->ID()->getText(), size};
     varList.push_front(pval);
@@ -267,6 +269,7 @@ antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
     std::string funcname = ctx->ID()->getText();
     std::vector<ProgramValue> define;
     std::vector<ProgramValue> use;
+    
     for(ProgramValue p : queue)
         use.push_back(p);
     CallInstruction* instr = new CallInstruction(CALL, define, use);
@@ -284,7 +287,7 @@ antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
     for(ProgramValue p : queue)
         use.push_back(p);
     define.push_back(rval);
-    CallInstruction* instr = new CallInstruction(CALL, define, use);
+    CallInstruction* instr = new CallInstruction(CALLR, define, use);
     instr->setOperands(funcname, queue, rval);
     currentFunction->addInstruction(instr);
     return 0;

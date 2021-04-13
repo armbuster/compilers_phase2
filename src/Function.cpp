@@ -27,7 +27,6 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
         dtypeMap[intList[i].value] = intList[i];
     }
 
-    // TODO: assign arguments to $a0-$a3 in sequential order
     for(int i=0; i < params.size(); i++)
     {
         std::string p = params[i];
