@@ -1,4 +1,5 @@
 #include "Function.h"
+#include "Instruction.h"
 
 Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_, std::deque<std::string> params_)
 {

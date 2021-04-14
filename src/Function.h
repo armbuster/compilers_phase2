@@ -39,7 +39,7 @@ class Function {
         void addBranchSrc(std::string labelText, Instruction* inst);
         Instruction* getBrSrcInst(std::string label);
         InstContainer* getInstructions() { return instructions; }
-        ProgramValue getDtype(std::string) { return dtypeMap.at(name); };
+        ProgramValue getDtype(std::string) { return dtypeMap.at(funcName); };
         std::map<std::string, ProgramValue>* getDtypeMap() { return &dtypeMap; };
         std::string getName() { return funcName; };
 

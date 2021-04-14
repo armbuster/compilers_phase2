@@ -1,4 +1,6 @@
 #include "CodeGenerator.h"
+#include "Instruction.h"
+
 //#include "FunctionWriter.h"
 
 CodeGenerator::CodeGenerator(Module* m, std::ostream * out)
@@ -209,7 +211,7 @@ void CodeGenerator::writeLabel(std::string label)
 
 void CodeGenerator::genInstruction(Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations)
 {
-    InstructionType instType = inst->getInstructionType();
+    InstOpType instType = inst->getInstOpType();
     switch(instType){
         case ASSIGN: genAssign(inst, storageLocations); break;
         case CALL: genCall(inst, storageLocations); break;
@@ -244,7 +246,7 @@ int CodeGenerator::getSubroutineMaxArguments(Function* func)
     std::vector<Instruction*>* instructions = func->getInstructions();
     for(std::vector<Instruction*>::iterator it = instructions->begin(); it != instructions->end(); it++)
     {
-        if ((*it)->getInstructionType() == CALL || (*it)->getInstructionType() == CALLR)
+        if ((*it)->getInstOpType() == CALL || (*it)->getInstOpType() == CALLR)
         {
             CallInstruction * instr = (CallInstruction*) (*it);
             maxArguments = std::max(maxArguments, (int) (instr->args).size());
@@ -514,7 +516,7 @@ void CodeGenerator::genBranch(Instruction* instr, std::map<std::string, MemoryLo
     
     Register lhsRegister = getLoadReg(lhs, instr, 1, storageLocations);
     Register rhsRegister = getLoadReg(rhs, instr, 2, storageLocations);
-    InstructionType branchType = instr->getInstructionType();
+    InstOpType branchType = instr->getInstOpType();
     std::string branch;
     
     switch(branchType)
@@ -603,7 +605,7 @@ void CodeGenerator::genArrayAccess(Instruction* instr, std::map<std::string, Mem
     
 
 
-    if(instr->getInstructionType() == ARRAY_LOAD)
+    if(instr->getInstOpType() == ARRAY_LOAD)
     {
         Register valReg = getStoreReg(val, instr, storageLocations);
         write2Op("lw", valReg, addr);

@@ -345,6 +345,11 @@ void LabelInstruction::setOperands(std::string label_)
     label=label_;
 }
 
+bool LabelInstruction::is(IR::InstType instType)
+{
+    return instType == IR::LABEL;
+}
+
 void LabelInstruction::print()
 {
     //TODO: add to this
@@ -411,6 +416,7 @@ const char* getInstOpTypeString(const InstOpType instOpType)
         PROCESS_VAL(ARRAY_STORE);
         PROCESS_VAL(ARRAY_LOAD);
         PROCESS_VAL(ARRAY_ASSIGN);
+        PROCESS_VAL(LABEL);
     }
 
     #undef PROCESS_VAL

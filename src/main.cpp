@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
     }
 
 
-    for (Function* func : mod->getFunctions())
+    for (Function* func : *mod->getFunctions())
     {
         IR::CFG* cfg = new IR::CFG(func);
         cfg->build();
