@@ -1,5 +1,8 @@
+#include <fstream>
+#include <iostream>
+
 #include "ParseTree.h"
-//#include "CFG.h"
+#include "CFG.h"
 #include "CodeGenerator.h"
 
 // CITATION:
@@ -35,9 +38,9 @@ int main(int argc, char* argv[]) {
     //     tokens_code=0;
 
     // read input file
-    if (optionExists(argv, argv+argc, "-i"))
+    if (optionExists(argv, argv+argc, "-r"))
     {
-        inputFile = getOption(argv, argv+argc, "-i");
+        inputFile = getOption(argv, argv+argc, "-r");
         std::string ext = ".ir";
         if (inputFile.size() > ext.size() &&
             inputFile.substr(inputFile.size() - ext.size()) == ".ir")
@@ -65,18 +68,26 @@ int main(int argc, char* argv[]) {
     
 
     // for testing, make it easy to switch between stdout and file output
-    std::ostream * out;
-    if(false)
+    std::ostream* out;
+    std::ofstream* outputFile;
+    if(true)
     {
-        std::ofstream outputFile;
-        outputFile.open(mipsOutputFile, std::ios::out);
-        out = &outputFile;
+        outputFile = new std::ofstream();
+        outputFile->open(mipsOutputFile, std::ios::out);
+        out = outputFile;
     }
     else
     {
         out = &std::cout;
     }
 
+
+    for (Function* func : *mod->getFunctions())
+    {
+        IR::CFG* cfg = new IR::CFG(func);
+        cfg->build();
+        cfg->print();
+    }
 
     
     // if register allocation strategy is not naive

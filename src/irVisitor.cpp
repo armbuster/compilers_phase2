@@ -11,6 +11,10 @@ Module* irVisitor::getModule()
     return mod;
 }
 
+void irVisitor::updateDtypeMap(std::map<std::string, ProgramValue> * dtypes)
+{
+    dtypeMap.insert(dtypes->begin(), dtypes->end());
+}
 
 antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ctx){
 
@@ -22,7 +26,8 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     std::deque<ProgramValue> floatList = visit(ctx->varList(1));
     
     // create function object
-    currentFunction = new Function(funcname, dtype, floatList, intList);
+    currentFunction = new Function(funcname, dtype, floatList, intList, params);
+    updateDtypeMap(currentFunction->getDtypeMap());
     visit(ctx->funcBody());
     mod->addFunction(currentFunction);
     return 0;
@@ -68,6 +73,8 @@ antlrcpp::Any irVisitor::visitVarListExpand(tiger::tigerIrParser::VarListExpandC
         vtype=VAR;
     else if(size > 0)
         vtype=ARRAY;
+    else
+        assert(false);
 
     ProgramValue pval = {vtype, UNKNOWN, ctx->ID()->getText(), size};
     varList.push_front(pval);
@@ -93,7 +100,6 @@ antlrcpp::Any irVisitor::visitVarListEmpty(tiger::tigerIrParser::VarListEmptyCon
     return dq;
 }
 
-
 antlrcpp::Any irVisitor::visitTypeIdInt(tiger::tigerIrParser::TypeIdIntContext *ctx){
     return INT;
     
@@ -107,9 +113,9 @@ antlrcpp::Any irVisitor::visitTypeIdVoid(tiger::tigerIrParser::TypeIdVoidContext
     return VOID;
 }
 
-
 antlrcpp::Any irVisitor::visitValId(tiger::tigerIrParser::ValIdContext *ctx){
-    ProgramValue val = {VAR, UNKNOWN, ctx->ID()->getText(), 0};
+    DataType dtype = dtypeMap.at(ctx->ID()->getText()).dtype;
+    ProgramValue val = {VAR, dtype, ctx->ID()->getText(), 0};
     return val;
 }
 
@@ -123,7 +129,6 @@ antlrcpp::Any irVisitor::visitValFloatLit(tiger::tigerIrParser::ValFloatLitConte
     return val;
 }
 
-
 antlrcpp::Any irVisitor::visitArrayDerefNonempty(tiger::tigerIrParser::ArrayDerefNonemptyContext *ctx){
     return std::stoi(ctx->INTLIT()->getText());
 }
@@ -131,7 +136,6 @@ antlrcpp::Any irVisitor::visitArrayDerefNonempty(tiger::tigerIrParser::ArrayDere
 antlrcpp::Any irVisitor::visitArrayDerefEmpty(tiger::tigerIrParser::ArrayDerefEmptyContext *ctx){
     return 0;
 }
-
 
 antlrcpp::Any irVisitor::visitExprListContinue(tiger::tigerIrParser::ExprListContinueContext *ctx){
     std::deque<ProgramValue> dq = visit(ctx->exprList());
@@ -150,18 +154,22 @@ antlrcpp::Any irVisitor::visitExprListEmpty(tiger::tigerIrParser::ExprListEmptyC
     return dq;
 }
 
-
 antlrcpp::Any irVisitor::visitAssign(tiger::tigerIrParser::AssignContext *ctx){
     std::vector<ProgramValue> lhs; 
     lhs.push_back(visit(ctx->val(0)));
     std::vector<ProgramValue> rhs;
     rhs.push_back(visit(ctx->val(1)));
-    AssignInstruction* instr = new AssignInstruction(ASSIGN, lhs, rhs);
-    instr->setOperands(lhs[0], rhs[0]);
-    currentFunction->addInstruction(instr);
+    AssignInstruction* inst = new AssignInstruction(ASSIGN, lhs, rhs);
+    inst->setOperands(lhs[0], rhs[0]);
+    currentFunction->addInstruction(inst);
+
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
     return 0;
 }
-
 
 antlrcpp::Any irVisitor::visitAdd(tiger::tigerIrParser::AddContext *ctx)
 {
@@ -195,7 +203,12 @@ antlrcpp::Any irVisitor::visitOr_op(tiger::tigerIrParser::Or_opContext *ctx)
 
 antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx)
 {
-    return visitBrInst<tiger::tigerIrParser::Goto_opContext>(ctx, GOTO);
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    GotoInstruction* instr = new GotoInstruction(GOTO, define, use);
+    instr->setOperands(ctx->ID()->getText());
+    currentFunction->addInstruction(instr);
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitBreq(tiger::tigerIrParser::BreqContext *ctx)
@@ -231,22 +244,32 @@ antlrcpp::Any irVisitor::visitBrgeq(tiger::tigerIrParser::BrgeqContext *ctx)
 antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidContext *ctx){
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    ReturnInstruction* instr = new ReturnInstruction(RETURN_VOID, define, use);
-    instr->setOperands();
-    currentFunction->addInstruction(instr);
-    return 0;
+    ReturnInstruction* inst = new ReturnInstruction(RETURN_VOID, define, use);
+    inst->setOperands();
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoidContext *ctx){
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define;
     use.push_back(visit(ctx->val()));
-    ReturnInstruction * instr = new ReturnInstruction(RETURN_NONVOID, define, use);
-    instr->setOperands(use[0]);
-    currentFunction->addInstruction(instr);
-    return 0;
+    ReturnInstruction * inst = new ReturnInstruction(RETURN_NONVOID, define, use);
+    inst->setOperands(use[0]);
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
@@ -254,28 +277,44 @@ antlrcpp::Any irVisitor::visitCall(tiger::tigerIrParser::CallContext *ctx){
     std::string funcname = ctx->ID()->getText();
     std::vector<ProgramValue> define;
     std::vector<ProgramValue> use;
+    
     for(ProgramValue p : queue)
+    {
         use.push_back(p);
-    CallInstruction* instr = new CallInstruction(CALL, define, use);
-    instr->setOperands(funcname, queue);
-    currentFunction->addInstruction(instr);
+    }
+    CallInstruction* inst = new CallInstruction(CALL, define, use);
+    inst->setOperands(funcname, queue);
+    currentFunction->addInstruction(inst);
+
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
     return 0;
 }
 
 antlrcpp::Any irVisitor::visitCallr(tiger::tigerIrParser::CallrContext *ctx){
-    std::deque<ProgramValue> queue = visit(ctx ->exprList());
+    std::deque<ProgramValue> queue = visit(ctx->exprList());
     ProgramValue rval = visit(ctx->val());
     std::string funcname = ctx->ID()->getText();
     std::vector<ProgramValue> define;
     std::vector<ProgramValue> use;
     for(ProgramValue p : queue)
+    {
         use.push_back(p);
+    }
     define.push_back(rval);
-    CallInstruction* instr = new CallInstruction(CALL, define, use);
-    instr->setOperands(funcname, queue, rval);
-    currentFunction->addInstruction(instr);
-    return 0;
+    CallInstruction* inst = new CallInstruction(CALLR, define, use);
+    inst->setOperands(funcname, queue, rval);
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 
@@ -290,11 +329,16 @@ antlrcpp::Any irVisitor::visitArray_store(tiger::tigerIrParser::Array_storeConte
     use.push_back(storeval);
     use.push_back(array);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_STORE, define, use);
-    instr->setOperands(array, storeval, index);
-    currentFunction->addInstruction(instr);
-    return 0;
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_STORE, define, use);
+    inst->setOperands(array, storeval, index);
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext *ctx){
@@ -308,11 +352,16 @@ antlrcpp::Any irVisitor::visitArray_load(tiger::tigerIrParser::Array_loadContext
     use.push_back(array);
     define.push_back(loadval);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_LOAD, define, use);
-    instr->setOperands(array, loadval, index);
-    currentFunction->addInstruction(instr);
-    return 0;
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_LOAD, define, use);
+    inst->setOperands(array, loadval, index);
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignContext *ctx){
@@ -325,40 +374,133 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
     use.push_back(storeval);
     define.push_back(array);
 
-    ArrayInstruction* instr = new ArrayInstruction(ARRAY_ASSIGN, define, use);
-    instr->setOperands(array, storeval);
-    currentFunction->addInstruction(instr);
-    return 0;
+    ArrayInstruction* inst = new ArrayInstruction(ARRAY_ASSIGN, define, use);
+    inst->setOperands(array, storeval);
+    currentFunction->addInstruction(inst);
 
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    return 0;
 }
 
 antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 {
-    currentFunction->addBranchTarget(ctx->ID()->getText());
+    lastLabelText = ctx->ID()->getText();
+    printf("irVisitor::visitLabel - labelText=%s\n", lastLabelText.c_str());
+    currentFunction->addBranchTarget(lastLabelText);
+
+    isBranchTarget = true;
+    lastVisitedLabel = true;
+
+    // Not actual inst. Used in codeGen
+    std::vector<ProgramValue> use;
+    std::vector<ProgramValue> define; 
+    LabelInstruction* instr = new LabelInstruction(LABEL, define, use);
+    instr->setOperands(lastLabelText);
+
+    //TODO: figure out what to do with this... if we add it here I'll
+    //   need to add some checks.
+    //currentFunction->addInstruction(instr);
+
     return 0;
 }
 
 template <class ctxType>
-antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstructionType instType)
+antlrcpp::Any irVisitor::visitBinInst(ctxType *ctx, InstOpType instOpType)
 {
     std::vector<ProgramValue> lhs; 
     lhs.push_back(visit(ctx->val(2)));
     std::vector<ProgramValue> rhs;
     rhs.push_back(visit(ctx->val(0)));
     rhs.push_back(visit(ctx->val(1)));
-    BinaryInstruction* instr = new BinaryInstruction(instType, lhs, rhs);
-    instr->setOperands(lhs[0], rhs[0], rhs[1]);
-    currentFunction->addInstruction(instr);
+
+    BinaryInstruction* inst = new BinaryInstruction(instOpType, lhs, rhs);
+    inst->setOperands(lhs[0], rhs[0], rhs[1]);
+    currentFunction->addInstruction(inst);
+
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
     return 0;
 }
 
+
 template <class ctxType>
-antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstructionType instType)
+antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstOpType instOpType)
 {
     std::vector<ProgramValue> use;
-    std::vector<ProgramValue> define; 
-    BranchInstruction* instr = new BranchInstruction(instType, define, use);
-    instr->setOperands(ctx->ID()->getText());
-    currentFunction->addInstruction(instr);
+    std::vector<ProgramValue> define;
+    use.push_back(visit(ctx->val(0)));
+    use.push_back(visit(ctx->val(1))); 
+    BranchInstruction* inst = new BranchInstruction(instOpType, define, use);
+
+    std::string targetLabel = ctx->ID()->getText();
+    inst->setOperands(targetLabel, visit(ctx->val(0)), visit(ctx->val(1)));
+    currentFunction->addInstruction(inst);
+
+    printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
+    currentFunction->addBranchSrc(targetLabel, inst);
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    // If this is a branch inst the next will be the target
+    isBranchTarget = true;
     return 0;
+}
+
+void irVisitor::isInstBrTarget(Instruction* inst)
+{
+    if (isBranchTarget)
+    {
+        printf("irVisitor::isInstBrTarget - isBranchTarget\n");
+        
+        //mark as leader
+        inst->markAsLeader();
+        inst->isBranchTarget(true);
+        currentFunction->addBranchTarget(lastLabelText, inst);
+        
+        //mark false when done
+        isBranchTarget = false;
+    }
+    
+}
+
+void irVisitor::updatePrevInst(Instruction* nextInst)
+{
+    if (prevInst != nullptr)
+    {
+        prevInst->addSuccessor(nextInst);
+        nextInst->addPredecessor(prevInst);
+    }
+    //update for next call
+    prevInst = nextInst;
+}
+
+void irVisitor::updateInstId(Instruction* inst)
+{
+    inst->setId(instId);
+    ++instId;
+}
+
+void irVisitor::checkIfFollowingLabel(Instruction* inst)
+{
+    Instruction* brSrcInst = nullptr;
+
+    if (lastVisitedLabel)
+    {
+        brSrcInst = currentFunction->getBrSrcInst(lastLabelText);
+        if (brSrcInst != nullptr) //getBrSrcInst() can return nullptr
+        {
+            brSrcInst->addSuccessor(inst);
+            inst->addPredecessor(inst);
+        }
+        lastVisitedLabel = false; //make sure this only happens once
+    }
 }

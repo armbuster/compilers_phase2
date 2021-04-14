@@ -4,14 +4,14 @@
 #include "Function.h"
 
 
-
 class Module {
 
-    std::vector<Function*> functionSeq;
+   FunctionContainer* functionSeq = new FunctionContainer();
 
     public:
-        Function * getFunction(std::string name);
+        Function* getFunction(std::string name);
+        FunctionContainer* getFunctions() { return functionSeq; };
         std::vector<std::string>* getFunctionNames();
-        void addFunction(Function * f);
+        void addFunction(Function* f);
 
 };

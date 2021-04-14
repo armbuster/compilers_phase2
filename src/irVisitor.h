@@ -10,16 +10,26 @@
 #include <map>
 #include <deque>
 #include <vector>
+#include <stdio.h>
 
 
  class irVisitor : public tiger::tigerIrBaseVisitor {
-     Module* mod;
-     Function* currentFunction;
+     private:
+        Module* mod;
+        Function* currentFunction;
+        bool isBranchTarget = false;
+        std::string lastLabelText;
+        Instruction* prevInst = nullptr;
+        unsigned int instId = 0;
+        bool lastVisitedLabel = false;
+        std::map<std::string, ProgramValue> dtypeMap;
 
      public:
         irVisitor();
 
         Module* getModule();
+
+        void updateDtypeMap(std::map<std::string, ProgramValue> * dtypes);
 
         antlrcpp::Any visitFunction(tiger::tigerIrParser::FunctionContext *ctx);
 
@@ -107,9 +117,17 @@
 
      private:
         template <class ctxType>
-        antlrcpp::Any visitBinInst(ctxType *ctx, InstructionType instType);
+        antlrcpp::Any visitBinInst(ctxType *ctx, InstOpType instOpType);
 
         template <class ctxType>
-        antlrcpp::Any visitBrInst(ctxType *ctx, InstructionType instType);
+        antlrcpp::Any visitBrInst(ctxType *ctx, InstOpType instOpType);
+
+        void isInstBrTarget(Instruction* inst);
+
+        void updatePrevInst(Instruction* nextInst);
+
+        void updateInstId(Instruction* inst);
+
+        void checkIfFollowingLabel(Instruction* inst);
 
 };

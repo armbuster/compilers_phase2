@@ -23,10 +23,10 @@ Register::Register(RegisterClass r, int registerIndex)
     ind = registerIndex;
 }
 
-// Register::Register(const Register& r)
-// {
-
-// }
+RegisterClass Register::getRegisterClass()
+{
+    return R;
+}
 
 
 
@@ -35,6 +35,7 @@ std::map<RegisterClass, std::string> m = {
     {T,"$t"},
     {S,"$s"},
     {V,"$v"},
+    {F,"$f"},
     {SP,"$sp"},
     {RA,"$ra"},
     {FP,"$fp"}
@@ -46,4 +47,12 @@ std::ostream& operator<<(std::ostream& out, const Register& r)
     if (r.ind != -1)
         out << r.ind;
     return out;
+}
+
+bool operator==(const Register& lhs, const Register& rhs)
+{
+    if(lhs.ind == rhs.ind && lhs.R == rhs.R)
+        return true;
+    else
+        return false;
 }

@@ -10,6 +10,6 @@ struct MemoryLocation {
 
     int offset;
     Register r;
-    //friend std::ostream& operator<<(std::ostream& out, const MemoryLocation& r);
+    friend std::ostream& operator<<(std::ostream& out, const MemoryLocation& r);
     MemoryLocation(int offset_, Register r_);
 };
