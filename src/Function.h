@@ -13,6 +13,7 @@
 #include "typedefs.h"
 
 class Function {
+
     std::string funcName;
     DataType rtype;
     InstContainer* instructions = new InstContainer();              // vector of IR instructions in program order

@@ -12,6 +12,7 @@
 #include "typedefs.h"
 #include "BasicBlock.h"
 #include "StorageLocation.h"
+#include "Register.h"
 
 
 class Instruction {
@@ -89,22 +90,19 @@ class BranchInstruction : public Instruction {
     ProgramValue lval;
     ProgramValue rval;
     std::string label;
-
-    public:
+        
+        // inherit constructor
         using Instruction::Instruction;
-        bool is(IR::InstType instType);
-        void print();
         void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
 };
 
 
 class GotoInstruction : public Instruction{
     public:
-    ////// keep these
-    std::string label;
-
         using Instruction::Instruction;
-        void setOperands(std::string label);
+        bool is(IR::InstType instType);
+        void print();
+        void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
 };
 
 
@@ -130,7 +128,6 @@ class CallInstruction : public Instruction {
         void print();
         void setOperands(std::string funcname_, std::deque<ProgramValue> args_, ProgramValue rval = {EMPTY, UNKNOWN, "", 0});
 };
-
 
 
 class ArrayInstruction : public Instruction {

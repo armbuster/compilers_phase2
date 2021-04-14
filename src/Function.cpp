@@ -1,6 +1,6 @@
 #include "Function.h"
 
-Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_)
+Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_, std::deque<std::string> params_)
 {
     funcName = name_;
     rtype = rtype_;
@@ -33,8 +33,8 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
         Register * r = new Register(A, i);
         (*argumentRegisters)[p] = r;
     }
-}
 
+}
 
 void Function::addInstruction(Instruction* instr)
 {
@@ -48,6 +48,7 @@ void Function::addInstruction(Instruction* instr)
     ++instr_count;
 }
 
+////// keep this
 void Function::addBranchTarget(std::string bTarget)
 {
     branchTargetsId[bTarget] = instr_count;

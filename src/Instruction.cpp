@@ -122,6 +122,7 @@ void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
     rhs = rhs_;
 }
 
+
 //***************************************************************************************************
 // Binary
 bool BinaryInstruction::is(IR::InstType instType)
@@ -181,10 +182,11 @@ void BranchInstruction::print()
     printf("\n");
 }
 
-void BranchInstruction::setOperands(std::string label, ProgramValue lval_, ProgramValue rval_)
+void BranchInstruction::setOperands(std::string label_, ProgramValue lval_, ProgramValue rval_)
 {
     lval = lval_;
     rval = rval_;
+    label = label_;
 }
 
 //***************************************************************************************************
@@ -335,16 +337,12 @@ void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_,
     value = value_;
 }
 
+
 //***************************************************************************************************
 // Label
 void LabelInstruction::setOperands(std::string label_)
 {
     label=label_;
-}
-
-bool GotoInstruction::is(IR::InstType instType)
-{
-    return instType == IR::LABEL;
 }
 
 void LabelInstruction::print()

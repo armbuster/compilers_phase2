@@ -22,11 +22,14 @@
         Instruction* prevInst = nullptr;
         unsigned int instId = 0;
         bool lastVisitedLabel = false;
+        std::map<std::string, ProgramValue> dtypeMap;
 
      public:
         irVisitor();
 
         Module* getModule();
+
+        void updateDtypeMap(std::map<std::string, ProgramValue> * dtypes);
 
         antlrcpp::Any visitFunction(tiger::tigerIrParser::FunctionContext *ctx);
 
