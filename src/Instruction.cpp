@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream& out, const InstructionType instr)
         PROCESS_VAL(ARRAY_STORE);
         PROCESS_VAL(ARRAY_LOAD);
         PROCESS_VAL(ARRAY_ASSIGN);
+        PROCESS_VAL(LABEL);
     }
 
     #undef PROCESS_VAL
@@ -112,10 +113,10 @@ bool Instruction::isDefined(std::string name)
 
 // check if name is in define/use for this instruction
 // if so, store the register assignment
+// keep this
 void Instruction::setRegisterAssignment(std::string name, Register* reg)
 {
 
-    if(isDefined(name) || isUsed(name))
         (*registerAssignments)[name]=reg;
 }
 
@@ -135,7 +136,7 @@ void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, Progr
     {
         case ADD: instrType="add"; break;
         case SUB: instrType="sub"; break;
-        case MULT: instrType="mult"; break;
+        case MULT: instrType="mul"; break;
         case DIV: instrType="div"; break;
         case AND: instrType="and"; break;
         case OR: instrType="or"; break;
@@ -163,6 +164,7 @@ void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue
 {
     funcname = funcname_;
     args = args_;
+    returnVal = rval_;
 }
 
 void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
@@ -182,7 +184,7 @@ void LabelInstruction::setOperands(std::string label_)
     label=label_;
 }
 
-
+////// keep these
 std::map<std::string, Register*>* Instruction::getRegisterAssignments()
 {
     return registerAssignments;

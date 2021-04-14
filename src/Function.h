@@ -26,9 +26,11 @@ class Function {
 
     public:
         Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_, std::deque<std::string> params_);
+        
+        
+        // keep these
         void addInstruction(Instruction* instr);
         void addBranchTarget(std::string label);
-        
         std::string getName();
         std::vector<Instruction*>* getInstructions();
         ProgramValue getDtype(std::string);

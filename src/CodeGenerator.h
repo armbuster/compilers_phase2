@@ -17,6 +17,7 @@ class CodeGenerator{
     //std::vector<FunctionWriter*> completeFuncs;
     std::ostream * outStream;
     std::map<std::string, MemoryLocation>* globalMap;
+    Function* currentFunction;
     int currentStackSize;
 
     public:
@@ -33,8 +34,11 @@ class CodeGenerator{
         void write1Op(std::string mipsOp, op1 operand);
         void writeLabel(std::string label);
 
-        void genFunction(Function* func);
+        
 
+
+        void setCurrentFunction(Function* func);
+        Function* getCurrentFunction();
         std::map<std::string, MemoryLocation>* stackSetup(Function* func);
 
         int getSubroutineMaxArguments(Function* func);
@@ -43,6 +47,9 @@ class CodeGenerator{
         
         
         void dumpToMemory(Register reg, std::string valName, std::map<std::string, MemoryLocation>* storageLocations);
+        void saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        void loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        
         bool isAssignedRegister(std::string valName, Instruction * inst);
         Register getAssignedRegister(std::string valName, Instruction * inst);
 
@@ -51,7 +58,8 @@ class CodeGenerator{
         Register getStoreReg(ProgramValue name, Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations);
         Register getLoadReg(ProgramValue name, Instruction * inst, int defaultRegisterIndex, std::map<std::string, MemoryLocation>* storageLocations);
         
-        
+        void genFunction(Function* func);
+        void genReturn(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genInstruction(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genBranch(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genAssign(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
@@ -59,7 +67,10 @@ class CodeGenerator{
         void genBinary(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genGoto(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genLabel(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        void genArrayAccess(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        void genArrayAssign(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         void genPrinti();
+        void genPrintf();
 
 
 

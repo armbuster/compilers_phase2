@@ -14,6 +14,7 @@ CodeGenerator::CodeGenerator(Module* m, std::ostream * out)
     std::vector<std::string>::iterator it = std::find(funcNames->begin(), funcNames->end(), "main");
     assert(it != funcNames->end());
     genPrinti();
+    genPrintf();
     
     // process main function first and then the rest
     Function* mainFunc = programModule->getFunction("main");
@@ -39,6 +40,23 @@ void CodeGenerator::genPrinti()
     *outStream << "    jr $ra" << std::endl;
     *outStream << "\n\n\n";
 }
+
+void CodeGenerator::genPrintf()
+{
+    *outStream << "printf:" << std::endl;
+    *outStream << "    mtc1 $a0, $f12" << std::endl;
+    *outStream << "    li $v0, 2" << std::endl;
+    *outStream << "    syscall" << std::endl;
+    *outStream << "    li $v0, 4" << std::endl;
+    *outStream << "    la $a0, newline" << std::endl;
+    *outStream << "    syscall" << std::endl;
+    *outStream << "    jr $ra" << std::endl;
+    *outStream << "\n\n\n";
+}
+
+
+
+
 
 std::map<std::string, MemoryLocation>* CodeGenerator::stackSetup(Function* func)
 {
@@ -101,15 +119,25 @@ void CodeGenerator::genFunction(Function* func)
     std::map<std::string, MemoryLocation>* storageLocations = stackSetup(func);
     if(func -> getName() == "main")
         setGlobalMap(storageLocations);
+    setCurrentFunction(func);
     
     std::vector<Instruction*>* instructions = func->getInstructions();
     for(std::vector<Instruction*>::iterator it = instructions->begin(); it != instructions->end(); it++)
     {
         genInstruction(*it, storageLocations);
     }
-    write3Op("addiu", Register(SP), Register(SP), currentStackSize);
-    write1Op("jr", Register(RA));
+}
 
+
+
+
+void CodeGenerator::setCurrentFunction(Function* func)
+{
+    currentFunction=func;
+}
+Function* CodeGenerator::getCurrentFunction()
+{
+    return currentFunction;
 }
 
 
@@ -185,6 +213,7 @@ void CodeGenerator::genInstruction(Instruction * inst, std::map<std::string, Mem
     switch(instType){
         case ASSIGN: genAssign(inst, storageLocations); break;
         case CALL: genCall(inst, storageLocations); break;
+        case CALLR: genCall(inst, storageLocations); break;
         case ADD: genBinary(inst, storageLocations); break;
         case SUB: genBinary(inst, storageLocations); break;
         case MULT: genBinary(inst, storageLocations); break;
@@ -199,7 +228,11 @@ void CodeGenerator::genInstruction(Instruction * inst, std::map<std::string, Mem
         case BRLEQ: genBranch(inst, storageLocations); break;
         case GOTO: genGoto(inst, storageLocations); break;
         case LABEL: genLabel(inst, storageLocations); break;
-        default:;
+        case RETURN_VOID: genReturn(inst, storageLocations); break;
+        case RETURN_NONVOID: genReturn(inst, storageLocations); break;
+        case ARRAY_LOAD: genArrayAccess(inst, storageLocations); break;
+        case ARRAY_STORE: genArrayAccess(inst, storageLocations); break;
+        case ARRAY_ASSIGN: genArrayAssign(inst, storageLocations); break;
     }
     
 
@@ -319,6 +352,28 @@ Register CodeGenerator::getLoadReg(ProgramValue name, Instruction * inst, int de
 
 }
 
+void CodeGenerator::saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
+    for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
+    {
+        MemoryLocation memLoc = storageLocations->at(it->first);
+        write2Op("sw", *(it->second), memLoc);
+    }
+
+}
+
+void CodeGenerator::loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
+    for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
+    {
+        MemoryLocation memLoc = storageLocations->at(it->first);
+        write2Op("lw", *(it->second), memLoc);
+    }
+}
+
+
 void CodeGenerator::dumpToMemory(Register storeRegister, std::string valName, std::map<std::string, MemoryLocation>* storageLocations)
 {
     
@@ -370,9 +425,12 @@ void CodeGenerator::genBinary(Instruction* instr, std::map<std::string, MemoryLo
 
 void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
 {
-    // TODO: spill any allocated registers
     write2Op("sw", Register(RA), storageLocations->at("_ra"));
     CallInstruction * callInstr = (CallInstruction*) instr;
+    
+    // spill allocated registers
+    saveRegisters(instr, storageLocations);
+
     for(int i = 0; i < (callInstr->args).size(); i++)
     {
         if(i < 4)
@@ -383,17 +441,38 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
 
             else if(arg.vtype==VAR)
             {
-                MemoryLocation memLocation = storageLocations->at(arg.value);
-                write2Op("lw", Register(A, i), memLocation);
+                if(!isAssignedRegister(arg.value, instr))
+                {
+                    MemoryLocation memLocation = storageLocations->at(arg.value);
+                    write2Op("lw", Register(A, i), memLocation);
+                }
             }
             else
                 assert(false);
             
         }
+        else
+            assert(false);
     }
 
     write1Op("jal", callInstr->funcname);
     write2Op("lw", Register(RA), storageLocations->at("_ra"));
+    
+    // restore allocated registers
+    loadRegisters(instr, storageLocations);
+
+    
+    // if there is a return val, copy it from $v0
+    ProgramValue rval = callInstr->returnVal;
+    if(rval.vtype != EMPTY)
+    {
+        assert(rval.dtype==INT && rval.vtype==VAR);
+        Register storeReg = getStoreReg(rval, instr, storageLocations);
+        write2Op("move", storeReg, Register(V, 0));
+        if(!isAssignedRegister(rval.value, instr))
+            dumpToMemory(storeReg, rval.value, storageLocations);
+    }
+
 }
 
 
@@ -408,7 +487,18 @@ void CodeGenerator::genAssign(Instruction* instr, std::map<std::string, MemoryLo
     //if(rhs.vtype != LITERAL)
     //{
     Register loadRegister = getLoadReg(rhs, instr, 1, storageLocations);
-    write2Op("move", storeRegister, loadRegister);
+    
+    if (storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()==F)
+        write2Op("mov.s", storeRegister, loadRegister);
+    else if(storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()!=F)
+    {
+        write2Op("mtc1", loadRegister, storeRegister);
+        write2Op("cvt.s.w", storeRegister, storeRegister);
+    }
+
+    else
+        write2Op("move", storeRegister, loadRegister);
+
 
     if(!isAssignedRegister(lhs.value, instr))
         dumpToMemory(storeRegister, lhs.value, storageLocations);
@@ -440,21 +530,21 @@ void CodeGenerator::genBranch(Instruction* instr, std::map<std::string, MemoryLo
 
     if(branchType==BREQ)
     {
-        write3Op("beq", Register(T,1), Register(T,2), branchInstr->label);
+        write3Op("beq", lhsRegister, rhsRegister, branchInstr->label);
     }
     else if(branchType==BRNEQ)
     {
-        write3Op("bne", Register(T,1), Register(T,2), branchInstr->label);
+        write3Op("bne", lhsRegister, rhsRegister, branchInstr->label);
     }
     else
     {
         if(branchType==BRLT || branchType==BRGEQ)
         {
-            write3Op("slt", Register(T,0), Register(T,1), Register(T,2));
+            write3Op("slt", Register(T,0), lhsRegister, rhsRegister);
         }
         else
         {
-            write3Op("slt", Register(T,0), Register(T,2), Register(T,1));
+            write3Op("slt", Register(T,0), rhsRegister, lhsRegister);
         }
         if(branchType==BRLT || branchType==BRGT)
         {
@@ -478,4 +568,79 @@ void CodeGenerator::genLabel(Instruction* instr, std::map<std::string, MemoryLoc
 {
     LabelInstruction * labelInstr = (LabelInstruction*) instr;
     writeLabel(labelInstr->label);
+}
+
+
+void CodeGenerator::genReturn(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    ReturnInstruction * labelInstr = (ReturnInstruction*) instr;
+    ProgramValue rval = labelInstr ->returnVal;
+    
+    if(rval.vtype!=EMPTY)
+    {
+        Register tmpRegister = getLoadReg(rval, instr, 1, storageLocations);
+        write2Op("move", Register(V, 0), tmpRegister);
+    }
+    write3Op("addiu", Register(SP), Register(SP), currentStackSize);
+    write1Op("jr", Register(RA));
+}
+
+
+void CodeGenerator::genArrayAccess(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    ArrayInstruction* arrInstr = (ArrayInstruction*) instr;
+
+    ProgramValue ndx = arrInstr->index;
+    ProgramValue arrName = arrInstr->arrayName;
+    ProgramValue val = arrInstr->value;
+    
+    
+    // compute offset
+    assert(ndx.vtype==LITERAL);
+    int offset = std::stoi(ndx.value) * 4;
+    MemoryLocation addr = storageLocations->at(arrName.value);
+    addr.offset+=offset;
+    
+
+
+    if(instr->getInstructionType() == ARRAY_LOAD)
+    {
+        Register valReg = getStoreReg(val, instr, storageLocations);
+        write2Op("lw", valReg, addr);
+        dumpToMemory(valReg, val.value, storageLocations);
+    }
+    else
+    {
+        Register valReg = getLoadReg(val, instr, 1, storageLocations);
+        write2Op("sw", valReg, addr);
+    }
+}
+
+
+
+void CodeGenerator::genArrayAssign(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    ArrayInstruction* arrInstr = (ArrayInstruction*) instr;
+
+    std::string arr = (arrInstr->arrayName).value;
+    Function* currentFunc = getCurrentFunction();
+    ProgramValue arrName = currentFunc->getDtype(arr);
+    
+    
+    MemoryLocation addr = storageLocations->at(arrName.value);
+    assert(arrName.vtype==ARRAY);
+
+    ProgramValue val = arrInstr->value;
+    Register valReg = getLoadReg(val, instr, 1, storageLocations);
+    
+    for(int i=0; i<arrName.size; i++)
+    {
+        write2Op("sw", valReg, addr);
+        addr.offset+=4;
+    }
+    
+    
+    //write2Op("sw", valReg, addr);
+
+
 }

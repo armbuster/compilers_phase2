@@ -68,18 +68,19 @@ class Instruction {
         std::vector<ProgramValue> getUse();
         bool isUsed(std::string name);
         bool isDefined(std::string name);
+        
+        ////// keep these
         std::map<std::string, Register*>* getRegisterAssignments();
         void setRegisterAssignment(std::string, Register*);
 
 
 
 
-        //virtual ~Instruction() = 0;
-        //virtual void setOperands() = 0;
 };
 
 class BinaryInstruction : public Instruction{
     public:
+    ////// keep these
     ProgramValue rhs1;
     ProgramValue rhs2;
     ProgramValue lhs;
@@ -92,6 +93,7 @@ class BinaryInstruction : public Instruction{
 
 class AssignInstruction : public Instruction{
     public:
+    ////// keep these
     ProgramValue rhs;
     ProgramValue lhs;
         
@@ -103,6 +105,7 @@ class AssignInstruction : public Instruction{
 
 class BranchInstruction : public Instruction{
     public:
+    ////// keep these
     ProgramValue lval;
     ProgramValue rval;
     std::string label;
@@ -116,6 +119,7 @@ class BranchInstruction : public Instruction{
 
 class GotoInstruction : public Instruction{
     public:
+    ////// keep these
     std::string label;
         
         // inherit constructor
@@ -125,7 +129,7 @@ class GotoInstruction : public Instruction{
 
 
 class ReturnInstruction : public Instruction{
-    public:
+    public:////// keep these
     ProgramValue returnVal;
         
         // inherit constructor
@@ -135,7 +139,7 @@ class ReturnInstruction : public Instruction{
 
 
 class CallInstruction : public Instruction{
-    public:
+    public:////// keep these
     std::deque<ProgramValue> args;
     std::string funcname;
     ProgramValue returnVal;
@@ -149,7 +153,7 @@ class CallInstruction : public Instruction{
 
 class ArrayInstruction : public Instruction{
     
-    public:
+    public:////// keep these
     ProgramValue arrayName;
     ProgramValue index;
     ProgramValue value;
@@ -162,7 +166,7 @@ class ArrayInstruction : public Instruction{
 
 class LabelInstruction : public Instruction{
     
-    public:
+    public:////// keep these
     std::string label;
         
         // inherit constructor
