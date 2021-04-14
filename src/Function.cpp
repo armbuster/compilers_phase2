@@ -2,32 +2,47 @@
 
 Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_)
 {
-    name = name_;
+    funcName = name_;
     rtype = rtype_;
     floatList = floatList_;
     intList = intList_;
+    params = params_;
     instr_count = 0;
+    instructions = new std::vector<Instruction*>();
+    argumentRegisters = new std::map<std::string, Register*>();
 
-    //std::cout << "FUNCTION: " << name << std::endl;
-
+    
+    ////// keep this
     for(int i = 0; i < floatList.size(); i++)
     {
-        // TODO : make sure this wont cause segfault
+        //std::cout << name_ <<": adding " << floatList[i].value << "to floatlist" << std::endl;
         floatList[i].dtype = FLOAT;
         dtypeMap[floatList[i].value] = floatList[i];
     }
-     
+    ////// keep this
     for(int i = 0; i < intList.size(); i++)
     {
-        // TODO : make sure this wont cause segfault
+        //std::cout << name_ <<": adding " << intList[i].value << "to intlist" << std::endl;
         intList[i].dtype = INT;
         dtypeMap[intList[i].value] = intList[i];
+    }
+    ////// keep this
+    for(int i=0; i < params.size(); i++)
+    {
+        std::string p = params[i];
+        Register * r = new Register(A, i);
+        (*argumentRegisters)[p] = r;
     }
 }
 
 
 void Function::addInstruction(Instruction* instr)
 {
+    for(std::map<std::string, Register*>::iterator it = argumentRegisters->begin(); it != argumentRegisters->end(); it++)
+    {
+        instr->setRegisterAssignment(it->first, it->second);
+    }
+
     //std::cout << *instr << std::endl;
     instructions->push_back(instr);
     ++instr_count;

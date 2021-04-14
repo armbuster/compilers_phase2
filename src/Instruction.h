@@ -30,6 +30,7 @@ class Instruction {
         InstContainer* successors_ = new InstContainer();
         InstContainer* predecessors_ = new InstContainer();
         unsigned int id_;
+        std::map<std::string, Register*>* registerAssignments; // map from variable names to storage locations
 
     public:
         Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
@@ -40,6 +41,8 @@ class Instruction {
         void printPredecessors();
         void printParent();
         BasicBlockContainer* getSuccessorsParents();
+        std::map<std::string, Register*>* getRegisterAssignments();
+        void setRegisterAssignment(std::string, Register*);
 
         void setId(unsigned int id) { id_ = id; }
         unsigned int getId() { return id_; }
@@ -60,12 +63,13 @@ class BinaryInstruction : public Instruction {
     ProgramValue rhs1;
     ProgramValue rhs2;
     ProgramValue lhs;
+    std::string instrType;
 
     public:
         using Instruction::Instruction; // inherit constructor
         bool is(IR::InstType instType);
         void print();
-        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_);
+        void setOperands(ProgramValue lhs_, ProgramValue rhs1_, ProgramValue rhs2_, InstructionType instrType);
 };
 
 
@@ -91,6 +95,16 @@ class BranchInstruction : public Instruction {
         bool is(IR::InstType instType);
         void print();
         void setOperands(std::string label, ProgramValue lval_ = {EMPTY, UNKNOWN, "", 0}, ProgramValue rval_ = {EMPTY, UNKNOWN, "", 0});
+};
+
+
+class GotoInstruction : public Instruction{
+    public:
+    ////// keep these
+    std::string label;
+
+        using Instruction::Instruction;
+        void setOperands(std::string label);
 };
 
 
@@ -132,3 +146,11 @@ class ArrayInstruction : public Instruction {
 };
 
 
+class LabelInstruction : public Instruction{
+    
+    public:////// keep these
+    std::string label;
+
+        using Instruction::Instruction;
+        void setOperands(std::string label_);
+};

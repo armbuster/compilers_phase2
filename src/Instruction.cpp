@@ -9,7 +9,8 @@ std::ostream& operator<<(std::ostream& out, const ValType vtype);
 std::ostream& operator<<(std::ostream& out, const DataType dataType);
 std::ostream& operator<<(std::ostream& out, const InstOpType instOpType);
 
-
+//***************************************************************************************************
+// Base
 Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_)
 {
     instOpType = instOpType_;
@@ -69,6 +70,17 @@ BasicBlockContainer* Instruction::getSuccessorsParents()
     return successorsParents;
 }
 
+void Instruction::setRegisterAssignment(std::string name, Register* reg)
+{
+
+        (*registerAssignments)[name]=reg;
+}
+
+std::map<std::string, Register*>* Instruction::getRegisterAssignments()
+{
+    return registerAssignments;
+}
+
 std::ostream& operator<<(std::ostream& out, const Instruction& instr)
 {
     out << instr.instOpType << ", DEFINE: ";
@@ -81,6 +93,8 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr)
     return out;
 }
 
+//***************************************************************************************************
+// Assign
 bool AssignInstruction::is(IR::InstType instType)
 {
     return instType == IR::ASSIGN;
@@ -108,6 +122,8 @@ void AssignInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs_)
     rhs = rhs_;
 }
 
+//***************************************************************************************************
+// Binary
 bool BinaryInstruction::is(IR::InstType instType)
 {
     return instType == IR::BINARY;
@@ -140,6 +156,8 @@ void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, Progr
     rhs2 = rhs2_;
 }
 
+//***************************************************************************************************
+// Branch
 bool BranchInstruction::is(IR::InstType instType)
 {
     return instType == IR::BRANCH;
@@ -169,6 +187,25 @@ void BranchInstruction::setOperands(std::string label, ProgramValue lval_, Progr
     rval = rval_;
 }
 
+//***************************************************************************************************
+// Goto
+void GotoInstruction::setOperands(std::string label_)
+{
+    label=label_;
+}
+
+bool GotoInstruction::is(IR::InstType instType)
+{
+    return instType == IR::BRANCH;
+}
+
+void GotoInstruction::print()
+{
+    //TODO: add to this
+}
+
+//***************************************************************************************************
+// Return
 bool ReturnInstruction::is(IR::InstType instType)
 {
     return instType == IR::RETURN;
@@ -192,6 +229,8 @@ void ReturnInstruction::setOperands(ProgramValue returnVal_)
     returnVal = returnVal_;
 }
 
+//***************************************************************************************************
+// Call
 bool CallInstruction::is(IR::InstType instType)
 {
     return instType == IR::CALL;
@@ -237,6 +276,8 @@ void CallInstruction::setOperands(std::string funcname_, std::deque<ProgramValue
     returnVal = returnVal_;
 }
 
+//***************************************************************************************************
+// Array
 bool ArrayInstruction::is(IR::InstType instType)
 {
     return instType == IR::ARRAY;
@@ -294,6 +335,24 @@ void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_,
     value = value_;
 }
 
+//***************************************************************************************************
+// Label
+void LabelInstruction::setOperands(std::string label_)
+{
+    label=label_;
+}
+
+bool GotoInstruction::is(IR::InstType instType)
+{
+    return instType == IR::LABEL;
+}
+
+void LabelInstruction::print()
+{
+    //TODO: add to this
+}
+
+//***************************************************************************************************
 // Print helpers
 const char* getValueTypeString(const ValType vtype)
 {

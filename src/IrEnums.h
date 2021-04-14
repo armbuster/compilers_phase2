@@ -34,7 +34,8 @@ enum InstOpType
     CALLR,
     ARRAY_STORE,
     ARRAY_LOAD,
-    ARRAY_ASSIGN
+    ARRAY_ASSIGN,
+    LABEL
 };
 
 namespace IR {
@@ -48,7 +49,8 @@ namespace IR {
         BRANCH,
         RETURN,
         CALL,
-        ARRAY
+        ARRAY,
+        LABEL
     };
 }; //end namespace IR
 
