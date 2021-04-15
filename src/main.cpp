@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     {
         IR::CFG* cfg = new IR::CFG(func);
         cfg->build();
-        cfg->print();
+        //cfg->print();
     }
 
     

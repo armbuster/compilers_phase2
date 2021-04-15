@@ -56,3 +56,11 @@ bool operator==(const Register& lhs, const Register& rhs)
     else
         return false;
 }
+
+bool operator!=(const Register& lhs, const Register& rhs)
+{
+    if(lhs.ind != rhs.ind || lhs.R != rhs.R)
+        return true;
+    else
+        return false;
+}
