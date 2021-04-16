@@ -1,6 +1,0 @@
-/* Test basic output */
-main
-	let
-	in begin
-		printi(1);
-	end
