@@ -3,6 +3,7 @@ antlr/lib/libantlr4-runtime.a
 
 #directories
 build/
+output/
 
 #file types
 .DS_Store
