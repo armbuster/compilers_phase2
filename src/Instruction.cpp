@@ -18,6 +18,7 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
     use = use_;
     leader = false;
     branchTarget = false;
+    registerAssignments = new std::map<std::string, Register *>();
 }
 
 void Instruction::addSuccessor(Instruction* successor)
@@ -155,6 +156,16 @@ void BinaryInstruction::setOperands(ProgramValue lhs_, ProgramValue rhs1_, Progr
     lhs = lhs_;
     rhs1 = rhs1_;
     rhs2 = rhs2_;
+    switch (instOpType)
+    {
+        case ADD: instrType="add"; break;
+        case SUB: instrType="sub"; break;
+        case MULT: instrType="mul"; break;
+        case DIV: instrType="div"; break;
+        case AND: instrType="and"; break;
+        case OR: instrType="or"; break;
+        default: assert(false);
+    }
 }
 
 //***************************************************************************************************

@@ -27,7 +27,7 @@ class Function {
     std::deque<ProgramValue> intList;                               // int variables used
     std::map<std::string, ProgramValue> dtypeMap;
     std::map<std::string, Register*>* argumentRegisters;
-    std::deque<std::string> params;
+    std::deque<ProgramValue> params;
     int instr_count;
 
     public:
@@ -37,10 +37,13 @@ class Function {
         void addBranchTarget(std::string label);
         void addBranchTarget(std::string labelText, Instruction* inst);
         void addBranchSrc(std::string labelText, Instruction* inst);
+        bool isinScope(std::string name);
         Instruction* getBrSrcInst(std::string label);
         InstContainer* getInstructions() { return instructions; }
-        ProgramValue getDtype(std::string) { return dtypeMap.at(funcName); };
+        ProgramValue getDtype(std::string name) { return dtypeMap.at(name); };
         std::map<std::string, ProgramValue>* getDtypeMap() { return &dtypeMap; };
+        std::deque<ProgramValue>* getParams() { return &params; };
         std::string getName() { return funcName; };
+        ProgramValue getProgramValue(std::string name) { return dtypeMap.at(name); };
 
 };

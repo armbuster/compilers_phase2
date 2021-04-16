@@ -96,9 +96,6 @@ std::map<std::string, MemoryLocation>* CodeGenerator::stackSetup(Function* func)
 
     }
 
-
-
-
     // move $sp to bottom of data section
     write3Op("addiu", Register(SP), Register(SP), -1*dataOffset);
     currentStackSize = dataOffset;
@@ -108,6 +105,17 @@ std::map<std::string, MemoryLocation>* CodeGenerator::stackSetup(Function* func)
     {
         storageLocations->insert(std::make_pair(it->first, MemoryLocation(dataOffset - it->second, Register(SP))));
     }
+
+    // immediately spill all floating point registers to memory
+    std::deque<ProgramValue>* params = func->getParams();
+    for(int i = 0; i < params->size(); i++)
+    {
+        if((*params)[i].dtype == FLOAT)
+            write2Op("sw", Register(A, i), storageLocations->at((*params)[i].value));
+    }
+
+
+
 
     return storageLocations;
 }
@@ -439,7 +447,18 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
         {
             ProgramValue arg = (callInstr->args)[i];
             if(arg.vtype==LITERAL)
-                write2Op("li", Register(A,i), arg.value);
+            {
+                if(arg.dtype==INT)
+                    write2Op("li", Register(A,i), arg.value);
+                if(arg.dtype==FLOAT)
+                {
+                    write2Op("li.s", Register(F,0), arg.value);
+                    write2Op("mfc1", Register(A,i), Register(F,0));
+                }
+
+            }
+
+                
 
             else if(arg.vtype==VAR)
             {
@@ -448,6 +467,11 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
                     MemoryLocation memLocation = storageLocations->at(arg.value);
                     write2Op("lw", Register(A, i), memLocation);
                 }
+                else if(Register(A, i) != getAssignedRegister(arg.value, instr))
+                {
+                    write2Op("copy", Register(A, i), getAssignedRegister(arg.value, instr));
+                }
+                    
             }
             else
                 assert(false);
@@ -468,9 +492,17 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
     ProgramValue rval = callInstr->returnVal;
     if(rval.vtype != EMPTY)
     {
-        assert(rval.dtype==INT && rval.vtype==VAR);
+        assert(rval.vtype==VAR);
         Register storeReg = getStoreReg(rval, instr, storageLocations);
-        write2Op("move", storeReg, Register(V, 0));
+        
+        if(storeReg.getRegisterClass()==T)
+            write2Op("move", storeReg, Register(V, 0));
+        else if(storeReg.getRegisterClass()==F)
+            write2Op("mtc1", Register(V, 0), storeReg);
+        else
+            assert(false);
+
+
         if(!isAssignedRegister(rval.value, instr))
             dumpToMemory(storeReg, rval.value, storageLocations);
     }
@@ -484,26 +516,47 @@ void CodeGenerator::genAssign(Instruction* instr, std::map<std::string, MemoryLo
     AssignInstruction * assignInstr = (AssignInstruction*) instr;
     ProgramValue lhs = assignInstr->lhs;
     ProgramValue rhs = assignInstr->rhs;
+    
+    if(lhs.vtype!=LITERAL && currentFunction->isinScope(lhs.value))
+        lhs=currentFunction->getDtype(lhs.value);
+    if(rhs.vtype!=LITERAL && currentFunction->isinScope(lhs.value))
+        rhs=currentFunction->getDtype(rhs.value);
+
     Register storeRegister = getStoreReg(lhs, instr, storageLocations);
     
-    //if(rhs.vtype != LITERAL)
-    //{
-    Register loadRegister = getLoadReg(rhs, instr, 1, storageLocations);
-    
-    if (storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()==F)
-        write2Op("mov.s", storeRegister, loadRegister);
-    else if(storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()!=F)
+    if(lhs.vtype != ARRAY)
     {
-        write2Op("mtc1", loadRegister, storeRegister);
-        write2Op("cvt.s.w", storeRegister, storeRegister);
+        Register loadRegister = getLoadReg(rhs, instr, 1, storageLocations);
+        
+        if (storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()==F)
+            write2Op("mov.s", storeRegister, loadRegister);
+        else if(storeRegister.getRegisterClass() == F && loadRegister.getRegisterClass()!=F)
+        {
+            write2Op("mtc1", loadRegister, storeRegister);
+            write2Op("cvt.s.w", storeRegister, storeRegister);
+        }
+
+        else
+            write2Op("move", storeRegister, loadRegister);
+
+
+        if(!isAssignedRegister(lhs.value, instr))
+            dumpToMemory(storeRegister, lhs.value, storageLocations);
+    }
+    else
+    {
+        MemoryLocation rhsAddr = storageLocations->at(rhs.value);
+        MemoryLocation lhsAddr = storageLocations->at(lhs.value);
+        for(int i=0; i<rhs.size; i++)
+        {
+            write2Op("lw", Register(T,0), rhsAddr);
+            write2Op("sw", Register(T,0), lhsAddr);
+            rhsAddr.offset-=4;
+            lhsAddr.offset-=4;
+        }
     }
 
-    else
-        write2Op("move", storeRegister, loadRegister);
 
-
-    if(!isAssignedRegister(lhs.value, instr))
-        dumpToMemory(storeRegister, lhs.value, storageLocations);
 }
 
 
@@ -529,34 +582,59 @@ void CodeGenerator::genBranch(Instruction* instr, std::map<std::string, MemoryLo
         case BRNEQ : branch = "brneq"; break;
         default : assert(false);
     }
+    
+    if(lhsRegister.getRegisterClass() == F)
+        assert(rhsRegister.getRegisterClass() == F);
+    if(rhsRegister.getRegisterClass() == F)
+        assert(lhsRegister.getRegisterClass() == F);
 
-    if(branchType==BREQ)
+    if(lhsRegister.getRegisterClass()==F)
     {
-        write3Op("beq", lhsRegister, rhsRegister, branchInstr->label);
-    }
-    else if(branchType==BRNEQ)
-    {
-        write3Op("bne", lhsRegister, rhsRegister, branchInstr->label);
+        if(branchType==BREQ)
+            write2Op("c.eq.s", lhsRegister, rhsRegister);
+        else if(branchType==BRNEQ)
+            write2Op("c.ne.s", lhsRegister, rhsRegister);
+        else if(branchType==BRLT)
+            write2Op("c.lt.s", lhsRegister, rhsRegister);
+        else if(branchType==BRGEQ)
+            write2Op("c.ge.s", lhsRegister, rhsRegister);
+        else if(branchType==BRGT)
+            write2Op("c.gt.s", lhsRegister, rhsRegister);
+        else if(branchType==BRLEQ)
+            write2Op("c.le.s", lhsRegister, rhsRegister);
+        write1Op("bc1t", branchInstr->label);
     }
     else
     {
-        if(branchType==BRLT || branchType==BRGEQ)
+        if(branchType==BREQ)
         {
-            write3Op("slt", Register(T,0), lhsRegister, rhsRegister);
+            write3Op("beq", lhsRegister, rhsRegister, branchInstr->label);
+        }
+        else if(branchType==BRNEQ)
+        {
+            write3Op("bne", lhsRegister, rhsRegister, branchInstr->label);
         }
         else
         {
-            write3Op("slt", Register(T,0), rhsRegister, lhsRegister);
-        }
-        if(branchType==BRLT || branchType==BRGT)
-        {
-            write3Op("bne", Register(T,0), "$0", branchInstr->label);
-        }
-        else
-        {
-            write3Op("beq", Register(T,0), "$0", branchInstr->label);
+            if(branchType==BRLT || branchType==BRGEQ)
+            {
+                write3Op("slt", Register(T,0), lhsRegister, rhsRegister);
+            }
+            else
+            {
+                write3Op("slt", Register(T,0), rhsRegister, lhsRegister);
+            }
+            if(branchType==BRLT || branchType==BRGT)
+            {
+                write3Op("bne", Register(T,0), "$0", branchInstr->label);
+            }
+            else
+            {
+                write3Op("beq", Register(T,0), "$0", branchInstr->label);
+            }
         }
     }
+
 }
 
 
@@ -581,7 +659,10 @@ void CodeGenerator::genReturn(Instruction* instr, std::map<std::string, MemoryLo
     if(rval.vtype!=EMPTY)
     {
         Register tmpRegister = getLoadReg(rval, instr, 1, storageLocations);
-        write2Op("move", Register(V, 0), tmpRegister);
+        if(tmpRegister.getRegisterClass()==F)
+            write2Op("mfc1", Register(V, 0), tmpRegister);
+        else
+            write2Op("move", Register(V, 0), tmpRegister);
     }
     write3Op("addiu", Register(SP), Register(SP), currentStackSize);
     write1Op("jr", Register(RA));
@@ -598,23 +679,43 @@ void CodeGenerator::genArrayAccess(Instruction* instr, std::map<std::string, Mem
     
     
     // compute offset
-    assert(ndx.vtype==LITERAL);
-    int offset = std::stoi(ndx.value) * 4;
-    MemoryLocation addr = storageLocations->at(arrName.value);
-    addr.offset+=offset;
+    //assert(ndx.vtype==LITERAL);
     
+    
+    Register offsetRegister(T,1);
+    if(ndx.vtype==LITERAL)
+        write2Op("li", Register(T,1), ndx.value);
+    else if (ndx.vtype==VAR)
+    {
+        offsetRegister=getLoadReg(ndx, instr, 1, storageLocations);
+    }
 
+    write2Op("li", Register(T,2), "4");
+    write3Op("mul", offsetRegister, offsetRegister, Register(T,2));
+
+    // relative to SP
+    MemoryLocation addr = storageLocations->at(arrName.value);
+
+    // load array offset from stack pointer into temp
+    write2Op("li", Register(T,2), addr.offset);
+    
+    // add stack pointer
+    write3Op("add", Register(T,2), Register(T,2), Register(SP));
+
+    // add to offset register
+    write3Op("sub", offsetRegister, Register(T,2), offsetRegister);
+    MemoryLocation elementAddr = MemoryLocation(0, offsetRegister);
 
     if(instr->getInstOpType() == ARRAY_LOAD)
     {
         Register valReg = getStoreReg(val, instr, storageLocations);
-        write2Op("lw", valReg, addr);
+        write2Op("lw", valReg, elementAddr);
         dumpToMemory(valReg, val.value, storageLocations);
     }
     else
     {
-        Register valReg = getLoadReg(val, instr, 1, storageLocations);
-        write2Op("sw", valReg, addr);
+        Register valReg = getLoadReg(val, instr, 2, storageLocations);
+        write2Op("sw", valReg, elementAddr);
     }
 }
 
@@ -633,13 +734,14 @@ void CodeGenerator::genArrayAssign(Instruction* instr, std::map<std::string, Mem
     assert(arrName.vtype==ARRAY);
 
     ProgramValue val = arrInstr->value;
-    Register valReg = getLoadReg(val, instr, 1, storageLocations);
     
+    Register valReg = getLoadReg(val, instr, 1, storageLocations);
     for(int i=0; i<arrName.size; i++)
     {
         write2Op("sw", valReg, addr);
-        addr.offset+=4;
+        addr.offset-=4;
     }
+
     
     
     //write2Op("sw", valReg, addr);

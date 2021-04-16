@@ -389,7 +389,7 @@ antlrcpp::Any irVisitor::visitArray_assign(tiger::tigerIrParser::Array_assignCon
 antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 {
     lastLabelText = ctx->ID()->getText();
-    printf("irVisitor::visitLabel - labelText=%s\n", lastLabelText.c_str());
+    //printf("irVisitor::visitLabel - labelText=%s\n", lastLabelText.c_str());
     currentFunction->addBranchTarget(lastLabelText);
 
     isBranchTarget = true;
@@ -403,7 +403,7 @@ antlrcpp::Any irVisitor::visitLabel(tiger::tigerIrParser::LabelContext *ctx)
 
     //TODO: figure out what to do with this... if we add it here I'll
     //   need to add some checks.
-    //currentFunction->addInstruction(instr);
+    currentFunction->addInstruction(instr);
 
     return 0;
 }
@@ -443,7 +443,7 @@ antlrcpp::Any irVisitor::visitBrInst(ctxType *ctx, InstOpType instOpType)
     inst->setOperands(targetLabel, visit(ctx->val(0)), visit(ctx->val(1)));
     currentFunction->addInstruction(inst);
 
-    printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
+    // printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
     currentFunction->addBranchSrc(targetLabel, inst);
     updateInstId(inst);
     isInstBrTarget(inst);
@@ -459,7 +459,7 @@ void irVisitor::isInstBrTarget(Instruction* inst)
 {
     if (isBranchTarget)
     {
-        printf("irVisitor::isInstBrTarget - isBranchTarget\n");
+        // printf("irVisitor::isInstBrTarget - isBranchTarget\n");
         
         //mark as leader
         inst->markAsLeader();
