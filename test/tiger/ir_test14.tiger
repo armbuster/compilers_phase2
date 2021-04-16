@@ -1,0 +1,12 @@
+/* Test while loop */
+main
+	let
+		var i : int;
+	in begin
+
+		i := 0;
+		while (i < 3) do
+			printi(i);
+			i := i + 1;
+		enddo;
+	end

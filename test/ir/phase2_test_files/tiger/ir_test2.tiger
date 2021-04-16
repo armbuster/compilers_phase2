@@ -1,0 +1,20 @@
+/* Test basic integer assignment */
+main
+	let
+		var a : int;
+		var b, c  : int;
+		
+		var d : int := 3;
+		var e,f : int := 4;
+	
+	in begin
+		a := 1;
+		b := c := 2;
+
+		printi(a);
+		printi(b);
+		printi(c);
+		printi(d);
+		printi(e);
+		printi(f);
+	end

@@ -1,0 +1,42 @@
+/* Test basic float arithmetic operators*/
+main
+	let
+		var a, b : float := 5.0;
+		var c : float;
+	in begin
+		c := 200.0 + 100.0;
+		printf(c);
+		
+		c := a + 50.0;
+		printf(c);
+				
+		c := a + b;
+		printf(c);
+
+		c := 200.0 - 100.0;
+		printf(c);
+		
+		c := a - 50.0;
+		printf(c);
+
+		c := a - b;
+		printf(c);
+
+		c := 200.0 * 100.0;
+		printf(c);
+
+		c := a * 50.0;
+		printf(c);
+
+		c := a * b;
+		printf(c);
+		
+		c := 200.0 / 100.0;
+		printf(c);
+		
+		c := a / 1.0;
+		printf(c);
+
+		c := a / b;
+		printf(c);	
+	end

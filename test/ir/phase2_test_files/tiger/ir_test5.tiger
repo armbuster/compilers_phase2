@@ -1,0 +1,20 @@
+/* Test basic float assignment */
+main
+	let
+		var a : float;
+		var b, c  : float;
+		
+		var d : float := 3.0;
+		var e,f : float := 4.0;
+	
+	in begin
+		a := 1.0;
+		b := c := 2.0;
+
+		printf(a);
+		printf(b);
+		printf(c);
+		printf(d);
+		printf(e);
+		printf(f);
+	end

@@ -1,0 +1,19 @@
+/* Test int and float mixed arithmetic operators*/
+main
+	let
+		var a : int := 1;
+		var b : float := 2.0;
+		var d : float;
+	in begin
+		d := 1;
+		printf(d);
+
+		d := a;
+		printf(d);
+
+		d := a + b;
+		printf(d);
+
+		d := 12 + a + 1.5 + b + 3;
+		printf(d);
+	end

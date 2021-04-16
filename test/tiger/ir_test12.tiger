@@ -1,0 +1,23 @@
+/* Test nested conditional */
+main
+	let
+		var a : int := 1;
+		var b : int := 2;
+		var c : int := 3;
+	in begin
+
+
+		if a > b then
+			if b > c then
+				printi(1);
+			else
+				printi(2);
+			endif;
+		else
+			if b < c then
+				printi(3);
+			else
+				printi(4);
+			endif;
+		endif;
+	end
