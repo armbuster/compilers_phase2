@@ -7,6 +7,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <stdio.h>
+#include <algorithm>
 
 #include "IrEnums.h"
 #include "typedefs.h"
@@ -34,8 +35,8 @@ class Instruction {
     public:
         Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
         friend std::ostream& operator<<(std::ostream& os, const Instruction& instr);
-        void addSuccessor(Instruction* successor);
-        void addPredecessor(Instruction* predecessor);
+        bool addSuccessor(Instruction* successor);
+        bool addPredecessor(Instruction* predecessor);
         void printSuccessors();
         void printPredecessors();
         void printParent();

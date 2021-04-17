@@ -21,14 +21,26 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
     registerAssignments = new std::map<std::string, Register *>();
 }
 
-void Instruction::addSuccessor(Instruction* successor)
+bool Instruction::addSuccessor(Instruction* successor)
 {
-    successors_->push_back(successor);
+    // If not already in the list, then add
+    if (std::find(successors_->begin(), successors_->end(), successor) == successors_->end())
+    {
+        successors_->push_back(successor);
+        return true;
+    }
+    return false;
 }
 
-void Instruction::addPredecessor(Instruction* predecessor)
+bool Instruction::addPredecessor(Instruction* predecessor)
 {
-    predecessors_->push_back(predecessor);
+    // If not already in the list, then add
+    if (std::find(predecessors_->begin(), predecessors_->end(), predecessor) == predecessors_->end())
+    {
+        predecessors_->push_back(predecessor);
+        return true;
+    }
+    return false;
 }
 
 void Instruction::printSuccessors()
@@ -214,7 +226,14 @@ bool GotoInstruction::is(IR::InstType instType)
 
 void GotoInstruction::print()
 {
-    //TODO: add to this
+    printf("ID: %d ", id_);
+    //TODO: this should be able to handle conditional branches
+    printf("BRANCH - GOTO: %s ",
+        label.c_str());
+    printSuccessors();
+    printPredecessors();
+    printParent();
+    printf("\n");
 }
 
 //***************************************************************************************************
@@ -276,6 +295,7 @@ void CallInstruction::print()
                 getValueTypeString(argVal.vtype));
         }
     }
+    printf(") ");
     printSuccessors();
     printPredecessors();
     printParent();

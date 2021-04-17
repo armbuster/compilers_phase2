@@ -15,9 +15,17 @@ void IR::CFG::build()
 {
 	BasicBlock* bb = nullptr;
 
+	// std::cout << "CFG::build - 1" << std::endl;
 	// Iterate over the instructions in the function
 	for ( Instruction* inst : *function_->getInstructions() )
 	{
+		// Skip if label... even though labels are not instructions,
+		// it makes the code gen easier.
+		if ( inst->is(IR::LABEL) )
+		{
+			continue;
+		}
+
 		// Check the three conditions for an instruction to be a leader
 		markIfFirstInst(inst);
 		markIfPrevInstBr(inst);
@@ -32,7 +40,7 @@ void IR::CFG::build()
 			bb = new BasicBlock();
 		}
 
-		//TODO: if inst is a call... create recursive call to the CFG
+		//if interprocedural is desired, then a recursive call to CFG would be needed
 
 		// Add the instruction to the basic block
 		bb->addInstruction(inst);
@@ -128,6 +136,4 @@ void IR::CFG::addEdges()
 			}
 		}
 	}
-
-
 }

@@ -205,9 +205,22 @@ antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx)
 {
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    GotoInstruction* instr = new GotoInstruction(GOTO, define, use);
-    instr->setOperands(ctx->ID()->getText());
-    currentFunction->addInstruction(instr);
+    GotoInstruction* inst = new GotoInstruction(GOTO, define, use);
+
+    std::string targetLabel = ctx->ID()->getText();
+    inst->setOperands(targetLabel);
+    currentFunction->addInstruction(inst);
+
+    // printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
+    currentFunction->addBranchSrc(targetLabel, inst);
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    // If this is a branch inst the next will be the target
+    isBranchTarget = true;
+
     return 0;
 }
 
