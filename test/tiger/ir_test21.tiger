@@ -1,0 +1,10 @@
+/* Test basic user types */
+main
+	let
+		type myInt = int;
+		var a : myInt := 5;
+		var b : int := 10;
+	in begin
+		b := a + b;
+		printi(b);
+	end

@@ -1,0 +1,35 @@
+/* Test conditionals */
+main
+	let
+		var a : int := 1;
+		var b : int := 2;
+		var c : int := 3;
+	in begin
+		if a > 0 then
+			printi(1);
+		endif;
+		
+		if a < 2 then
+			printi(2);
+		endif;
+
+		if b == 2 then
+			printi(3);
+		endif;
+
+		if b != 4 then
+			printi(4);
+		endif;
+
+		if c >= 0 then
+			printi(5);		
+		else
+			printi(6);
+		endif;
+
+		if c <= 0 then
+			printi(7);
+		else
+			printi(8);
+		endif;
+	end

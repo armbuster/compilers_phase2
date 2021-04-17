@@ -1,0 +1,17 @@
+#start_function main
+void main()
+int-list: _t0, i
+float-list:
+      main:
+      assign, i, 0, 
+      Label_0:
+      brgeq, i, 3, Label_2
+   Label_1:
+      call, printi, i
+      add, i, 1, _t0
+      assign, i, _t0, 
+      goto, Label_0, , 
+   Label_2:
+      return, , ,
+#end_function main
+

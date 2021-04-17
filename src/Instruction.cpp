@@ -21,14 +21,26 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
     registerAssignments = new std::map<std::string, Register *>();
 }
 
-void Instruction::addSuccessor(Instruction* successor)
+bool Instruction::addSuccessor(Instruction* successor)
 {
-    successors_->push_back(successor);
+    // If not already in the list, then add
+    if (std::find(successors_->begin(), successors_->end(), successor) == successors_->end())
+    {
+        successors_->push_back(successor);
+        return true;
+    }
+    return false;
 }
 
-void Instruction::addPredecessor(Instruction* predecessor)
+bool Instruction::addPredecessor(Instruction* predecessor)
 {
-    predecessors_->push_back(predecessor);
+    // If not already in the list, then add
+    if (std::find(predecessors_->begin(), predecessors_->end(), predecessor) == predecessors_->end())
+    {
+        predecessors_->push_back(predecessor);
+        return true;
+    }
+    return false;
 }
 
 void Instruction::printSuccessors()
@@ -67,6 +79,11 @@ BasicBlockContainer* Instruction::getSuccessorsParents()
         {
             successorsParents->push_back(nextParent);
         }
+        // If instruction is branch and parents are equal
+        if ( instParentIsSelf(nextParent) )
+        {
+            successorsParents->push_back(parent_);
+        }
     }
     return successorsParents;
 }
@@ -92,6 +109,16 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr)
         out << "(" << p.vtype << "," << p.value << ") ";
     
     return out;
+}
+
+bool Instruction::instParentIsSelf(IR::BasicBlock* nextParent)
+{
+    // If not a branch this inst can't target itself
+    if ( this->is(IR::BRANCH) && nextParent == parent_ )
+    {
+        return true;
+    }
+    return false;
 }
 
 //***************************************************************************************************
@@ -214,7 +241,14 @@ bool GotoInstruction::is(IR::InstType instType)
 
 void GotoInstruction::print()
 {
-    //TODO: add to this
+    printf("ID: %d ", id_);
+    //TODO: this should be able to handle conditional branches
+    printf("BRANCH - GOTO: %s ",
+        label.c_str());
+    printSuccessors();
+    printPredecessors();
+    printParent();
+    printf("\n");
 }
 
 //***************************************************************************************************
@@ -276,6 +310,7 @@ void CallInstruction::print()
                 getValueTypeString(argVal.vtype));
         }
     }
+    printf(") ");
     printSuccessors();
     printPredecessors();
     printParent();
@@ -314,7 +349,7 @@ void ArrayInstruction::print()
     }
     else if (instOpType==ARRAY_LOAD)
     {
-        printf("ARRAY - LOAD: %s %s %s = %s %s %s[%s %s %s]\n",
+        printf("ARRAY - LOAD: %s %s %s = %s %s %s[%s %s %s] ",
             getDataTypeString(value.dtype),
             getValueTypeString(value.vtype),
             value.value.c_str(),
@@ -327,7 +362,7 @@ void ArrayInstruction::print()
     }
     else //instOpType==ARRAY_ASSIGN
     {
-        printf("ARRAY - ASSIGN: %s %s %s = %s %s %s\n",
+        printf("ARRAY - ASSIGN: %s %s %s = %s %s %s ",
             getDataTypeString(arrayName.dtype),
             getValueTypeString(arrayName.vtype),
             arrayName.value.c_str(),

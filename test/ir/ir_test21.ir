@@ -1,0 +1,13 @@
+#start_function main
+void main()
+int-list: _t0, a, b
+float-list:
+      main:
+      assign, a, 5, 
+      assign, b, 10, 
+      add, a, b, _t0
+      assign, b, _t0, 
+      call, printi, b
+      return, , ,
+#end_function main
+

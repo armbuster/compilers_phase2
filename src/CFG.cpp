@@ -15,9 +15,20 @@ void IR::CFG::build()
 {
 	BasicBlock* bb = nullptr;
 
+	// Assign id per function
+	id_ = function_->getId();
+
+	// std::cout << "CFG::build - 1" << std::endl;
 	// Iterate over the instructions in the function
 	for ( Instruction* inst : *function_->getInstructions() )
 	{
+		// Skip if label... even though labels are not instructions,
+		// it makes the code gen easier.
+		if ( inst->is(IR::LABEL) )
+		{
+			continue;
+		}
+
 		// Check the three conditions for an instruction to be a leader
 		markIfFirstInst(inst);
 		markIfPrevInstBr(inst);
@@ -32,7 +43,7 @@ void IR::CFG::build()
 			bb = new BasicBlock();
 		}
 
-		//TODO: if inst is a call... create recursive call to the CFG
+		//if interprocedural is desired, then a recursive call to CFG would be needed
 
 		// Add the instruction to the basic block
 		bb->addInstruction(inst);
@@ -48,8 +59,8 @@ void IR::CFG::build()
 
 void IR::CFG::print()
 {
-	printf("CFG:\n");
-	for (BasicBlock* bb : basicBlocks_)
+	printf("CFG: ID: %d\n", id_);
+	for (BasicBlock* bb : *basicBlocks_)
 	{
 		printf("\t");
 		bb->print();
@@ -94,7 +105,7 @@ bool IR::CFG::markIfBrTarget(Instruction* inst)
 bool IR::CFG::addBasicBlock(BasicBlock* bb)
 {
 	bb->setId(bbCount_);
-	basicBlocks_.push_back(bb);
+	basicBlocks_->push_back(bb);
 	bbCount_ += 1;
 	return true;
 }
@@ -111,23 +122,22 @@ bool IR::CFG::resolveBasicBlock(BasicBlock* bb)
 
 void IR::CFG::addEdges()
 {
-	BasicBlockContainer* otherParents;
+	BasicBlockContainer* parents;
 
-	for (BasicBlock* bb : basicBlocks_)
+	for (BasicBlock* bb : *basicBlocks_)
 	{
-		for (Instruction* inst : *bb->getInstructions())
+		InstContainer* instructions = bb->getInstructions();
+		for (Instruction* inst : *instructions)
 		{
-			otherParents = inst->getSuccessorsParents();
-			if ( otherParents->empty() )
+			parents = inst->getSuccessorsParents();
+			if ( parents->empty() )
 			{
 				continue;
 			}
 			else //add forward edges
 			{
-				bb->setSuccessors(otherParents);
+				bb->setSuccessors(parents);
 			}
 		}
 	}
-
-
 }

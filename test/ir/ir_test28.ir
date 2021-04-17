@@ -1,0 +1,44 @@
+#start_function main
+void main()
+int-list: size
+float-list:
+      main:
+      assign, size, 6, 
+      call, prng, 5, 7, 3, 3
+      return, , ,
+#end_function main
+
+#start_function modulo
+int modulo(int _2_a, int _2_b)
+int-list: _2_a, _2_b, _3_r, _t0, _t1, _t2
+float-list:
+      modulo:
+      div, _2_a, _2_b, _t0
+      mult, _2_b, _t0, _t1
+      sub, _2_a, _t1, _t2
+      assign, _3_r, _t2, 
+      return, _3_r, ,
+#end_function modulo
+
+#start_function prng
+void prng(int _4_seed, int _4_mod, int _4_mult, int _4_inc)
+int-list: _4_inc, _4_mod, _4_mult, _4_seed, _5_cur, _5_i, _5_prev, _t3, _t4, _t5
+float-list:
+      prng:
+      assign, _5_prev, _4_seed, 
+      assign, _5_i, 1, 
+      goto, Label_2, , 
+   Label_1:
+      call, printi, _5_prev
+      mult, _5_prev, _4_mult, _t3
+      add, _t3, _4_inc, _t4
+      callr, _t5, modulo, _t4, _4_mod
+      assign, _5_cur, _t5, 
+      assign, _5_prev, _5_cur, 
+      add, 1, _5_i, _5_i
+   Label_2:
+      brleq, _5_i, size, Label_1
+   Label_3:
+      return, , ,
+#end_function prng
+

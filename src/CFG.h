@@ -22,12 +22,15 @@ class CFG
  	void build();
  	void print();
 
+ 	void setId(unsigned int id) { id_ = id; }
+
  private:
  	Function* function_;
- 	BasicBlockContainer basicBlocks_;
+ 	BasicBlockContainer* basicBlocks_ = new BasicBlockContainer();
  	bool isFirstInstruction_;
  	bool isPrevInstructionBr_;
  	unsigned int bbCount_;
+ 	unsigned int id_;
 
  	bool markIfFirstInst(Instruction* inst);
  	bool markIfPrevInstBr(Instruction* inst);

@@ -1,0 +1,22 @@
+#start_function main
+void main()
+int-list: sum
+float-list:
+      main:
+      assign, sum, 0, 
+      call, addToSum, 10
+      call, addToSum, 20
+      call, printi, sum
+      return, , ,
+#end_function main
+
+#start_function addToSum
+void addToSum(int _2_x)
+int-list: _2_x, _t0
+float-list:
+      addToSum:
+      add, sum, _2_x, _t0
+      assign, sum, _t0, 
+      return, , ,
+#end_function addToSum
+

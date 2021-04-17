@@ -1,0 +1,10 @@
+#! /bin/bash
+
+CODE_GEN_OUTPUT_DIR=output
+
+if [ ! -d "$CODE_GEN_OUTPUT_DIR" ]; then
+	echo "INFO: creating the $CODE_GEN_OUTPUT_DIR directory"
+	mkdir $CODE_GEN_OUTPUT_DIR
+else
+	echo "INFO: the $CODE_GEN_OUTPUT_DIR already exists"
+fi

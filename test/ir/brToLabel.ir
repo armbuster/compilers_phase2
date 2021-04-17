@@ -1,0 +1,54 @@
+#start_function main
+    void main()
+    int-list: _t11, _t18, _t33, _t42
+    float-list: motor_force, drag, friction, M, dv_dt, rh0, CDa, dx_dt, G, Crr1, Crr2, dt, x_i, x_f, v_i, torque, radius, power, wire_loss, R_line, R_batt, Iphase, component_efficiency, mc_efficiency, motor_efficiency, batt_efficiency, mc_power_loss, bus_power, rpm_max, bus_voltage, batt_dissipated, bus_current, nominal_power, _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7, _t8, _t9, _t10, _t12, _t13, _t14, _t15, _t16, _t17, _t19, _t20, _t21, _t22, _t23, _t24, _t25, _t26, _t27, _t28, _t29, _t30, _t31, _t32, _t34, _t35, _t36, _t37, _t38, _t39, _t40, _t41, _t43, _t44, _t45, _t46, _t47
+    main:
+        assign, M, 320.0,
+        assign, G, 9.81,
+        assign, Crr1, 0.009,
+        assign, Crr2, 0.001,
+        assign, rh0, 1.225,
+        assign, CDa, 0.2,
+        assign, radius, 0.28,
+        assign, R_line, 0.05,
+        assign, R_batt, 0.16,
+        assign, x_i, 1000,
+        assign, v_i, 10,
+        assign, x_f, 1025,
+        assign, dt, 2.1,
+        assign, Iphase, 11.6,
+        assign, bus_power, 900,
+        assign, bus_voltage, 140.25,
+        sub, x_f, x_i, _t0
+        div, _t0, dt, _t1
+        assign, dx_dt, _t1,
+        sub, dx_dt, v_i, _t2
+        div, _t2, dt, _t3
+        assign, dv_dt, _t3,
+        mult, M, G, _t4
+        mult, Crr2, dx_dt, _t5
+        add, Crr1, _t5, _t6
+        mult, _t4, _t6, _t7
+        assign, friction, _t7,
+        mult, 0.5, rh0, _t8
+        mult, _t8, CDa, _t9
+        assign, _t10, dx_dt,
+        assign, _t11, 1,
+    label_0:
+        brgeq, _t11, 2, label_1
+        mult, _t10, dx_dt, _t10
+        add, _t11, 1, _t11
+        goto, label_0, ,
+    label_1:
+        mult, _t9, _t10, _t12
+        assign, drag, _t12,
+        add, drag, friction, _t13
+        mult, M, dv_dt, _t14
+        add, _t13, _t14, _t15
+        assign, motor_force, _t15,
+        mult, motor_force, radius, _t16
+        assign, torque, _t16,
+        assign, _t17, Iphase,
+        assign, _t18, 1,
+        goto, label_1, ,
+#end_function main

@@ -1,0 +1,10 @@
+/* Test of basic user defined procedure */
+main
+	let
+		function printSquare (x : int)
+			begin
+				printi(x * x);
+			end;
+	in begin
+		printSquare(10);
+	end

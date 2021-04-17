@@ -1,0 +1,46 @@
+#start_function main
+void main()
+int-list: _t0, _t1, _t10, _t11, _t2, _t3, _t4, _t5, _t6, _t7, _t8, _t9, a, b, c
+float-list:
+      main:
+      assign, a, 5, 
+      assign, b, 5, 
+      add, 200, 100, _t0
+      assign, c, _t0, 
+      call, printi, c
+      add, a, 50, _t1
+      assign, c, _t1, 
+      call, printi, c
+      add, a, b, _t2
+      assign, c, _t2, 
+      call, printi, c
+      sub, 200, 100, _t3
+      assign, c, _t3, 
+      call, printi, c
+      sub, a, 50, _t4
+      assign, c, _t4, 
+      call, printi, c
+      sub, a, b, _t5
+      assign, c, _t5, 
+      call, printi, c
+      mult, 200, 100, _t6
+      assign, c, _t6, 
+      call, printi, c
+      mult, a, 50, _t7
+      assign, c, _t7, 
+      call, printi, c
+      mult, a, b, _t8
+      assign, c, _t8, 
+      call, printi, c
+      div, 200, 100, _t9
+      assign, c, _t9, 
+      call, printi, c
+      div, a, 1, _t10
+      assign, c, _t10, 
+      call, printi, c
+      div, a, b, _t11
+      assign, c, _t11, 
+      call, printi, c
+      return, , ,
+#end_function main
+

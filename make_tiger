@@ -3,8 +3,8 @@
 # unzip antlr static lib
 ./util/open_static_lib 
 
-# create ir output directory
-# ./util/create_ir_output_dir
+# create code gen output directory
+./util/create_code_gen_output_dir
 
 if [ ! -d "build" ]; then
 	echo "INFO: creating build/"

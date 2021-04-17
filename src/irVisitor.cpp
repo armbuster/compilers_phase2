@@ -24,12 +24,16 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     std::string funcname = ctx->ID(0)->getText();
     std::deque<ProgramValue> intList = visit(ctx->varList(0));
     std::deque<ProgramValue> floatList = visit(ctx->varList(1));
+
+    //prep variables needed for each new CFG... this will need to change for interprocedural analysis
+    initNewFunction();
     
     // create function object
     currentFunction = new Function(funcname, dtype, floatList, intList, params);
     updateDtypeMap(currentFunction->getDtypeMap());
     visit(ctx->funcBody());
     mod->addFunction(currentFunction);
+
     return 0;
 
 }
@@ -205,9 +209,22 @@ antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx)
 {
     std::vector<ProgramValue> use;
     std::vector<ProgramValue> define; 
-    GotoInstruction* instr = new GotoInstruction(GOTO, define, use);
-    instr->setOperands(ctx->ID()->getText());
-    currentFunction->addInstruction(instr);
+    GotoInstruction* inst = new GotoInstruction(GOTO, define, use);
+
+    std::string targetLabel = ctx->ID()->getText();
+    inst->setOperands(targetLabel);
+    currentFunction->addInstruction(inst);
+
+    // printf("irVisitor::visitBrInst - isBranchInst: targetLabel=%s\n", targetLabel.c_str());
+    currentFunction->addBranchSrc(targetLabel, inst);
+    updateInstId(inst);
+    isInstBrTarget(inst);
+    updatePrevInst(inst);
+    checkIfFollowingLabel(inst);
+
+    // If this is a branch inst the next will be the target
+    isBranchTarget = true;
+
     return 0;
 }
 
@@ -503,4 +520,18 @@ void irVisitor::checkIfFollowingLabel(Instruction* inst)
         }
         lastVisitedLabel = false; //make sure this only happens once
     }
+}
+
+void irVisitor::initNewFunction()
+{
+    isBranchTarget = false;
+    prevInst = nullptr;
+    instId = 0;
+    lastVisitedLabel = false;
+
+    if (currentFunction != nullptr)
+    {
+        currentFunction->setId(functionCount);
+    }
+    ++functionCount;
 }

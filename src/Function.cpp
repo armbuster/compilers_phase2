@@ -63,11 +63,22 @@ void Function::addBranchTarget(std::string bTarget)
     branchTargetsId[bTarget] = instr_count;
 }
 
-void Function::addBranchTarget(std::string labelText, Instruction* targetInst)
+void Function::addBranchTarget(std::string label, Instruction* targetInst)
 {
     //std::cout << "Function::addBranchTarget" << std::endl;
-    brLabelToTargetInst->insert( {labelText, targetInst} );
-    //toFromBrInst.insert( {} )
+    //If label dne then add
+    if ( brLabelToTargetInst->find(label) == brLabelToTargetInst->end() )
+    {
+        brLabelToTargetInst->insert( {label, targetInst} );
+    }
+
+    //if srcInst has already been traversed by the visitor then add edges...
+    Instruction* srcInst = getBrSrcInst(label);
+    if ( srcInst != nullptr )
+    {
+        srcInst->addSuccessor(targetInst);
+        targetInst->addPredecessor(srcInst);
+    }
 }
 
 bool Function::isinScope(std::string name)
@@ -79,15 +90,25 @@ bool Function::isinScope(std::string name)
 
 }
 
-void Function::addBranchSrc(std::string labelText, Instruction* srcInst)
+void Function::addBranchSrc(std::string label, Instruction* srcInst)
 {
-    //std::cout << "Function::addBranchSrc" << std::endl;
-    brLabelToSrcInst->insert( {labelText, srcInst} );
+    //If label dne then add..
+    if ( brLabelToSrcInst->find(label) == brLabelToSrcInst->end() )
+    {
+        brLabelToSrcInst->insert( {label, srcInst} );
+    }
+    
+    //if targetInst has already been traversed by the visitor then add edges...
+    Instruction* targetInst = getBrTargetInst(label);
+    if ( targetInst != nullptr )
+    {
+        srcInst->addSuccessor(targetInst);
+        targetInst->addPredecessor(srcInst);
+    }
 }
 
 Instruction* Function::getBrSrcInst(std::string label)
 {
-    //std::cout << "Function::getBrSrcInst" << std::endl;
     // If key/label DNE
     if ( brLabelToSrcInst->find(label) == brLabelToSrcInst->end() )
     {
@@ -95,7 +116,19 @@ Instruction* Function::getBrSrcInst(std::string label)
     }
     else
     {
-        //std::cout << "Function::getBrSrcInst - here" << std::endl;
         return brLabelToSrcInst->at(label);
+    }
+}
+
+Instruction* Function::getBrTargetInst(std::string label)
+{
+    // If key/label DNE
+    if ( brLabelToTargetInst->find(label) == brLabelToTargetInst->end() )
+    {
+        return nullptr;
+    }
+    else
+    {
+        return brLabelToTargetInst->at(label);
     }
 }

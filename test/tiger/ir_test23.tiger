@@ -1,0 +1,13 @@
+/* Test array assignment */
+main
+	let
+		type intArray = array[3] of int;
+		var a : intArray := 1;
+		var b : intArray := 10;
+	in begin
+		printi(a[0]);
+		printi(b[0]);
+        
+		b := a;
+		printi(b[0] + b[1] + b[2]);
+	end

@@ -1,0 +1,15 @@
+/* Test of let statement */
+main
+	let
+		var a : int := 0;
+	in begin
+		printi(a);
+		
+		let
+			var a : int := 5;
+		in
+			printi(a);
+		end
+
+		printi(a);
+	end

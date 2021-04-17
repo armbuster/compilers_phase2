@@ -1,0 +1,16 @@
+#start_function main
+void main()
+int-list: _t0, _t1, _t2, _t3, a[3]
+float-list:
+      main:
+      array_store, a, 0, 10
+      array_store, a, 1, 20
+      array_load, _t0, a, 0
+      array_load, _t1, a, 1
+      add, _t0, _t1, _t2
+      array_store, a, 2, _t2
+      array_load, _t3, a, 2
+      call, printi, _t3
+      return, , ,
+#end_function main
+

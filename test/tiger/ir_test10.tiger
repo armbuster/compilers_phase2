@@ -1,0 +1,10 @@
+/* Test basic if-else stmt */
+main
+	let
+	in begin
+		if (1 > 0) then
+			printi(1);
+		else
+			printi(0);
+		endif;
+	end

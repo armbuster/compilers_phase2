@@ -1,0 +1,13 @@
+/* Test global scope */
+main
+	let
+		var sum : int := 0;
+		function addToSum (x : int)
+			begin
+                		sum := sum + x;
+			end;
+	in begin
+		addToSum(10);
+		addToSum(20);
+		printi(sum);
+	end

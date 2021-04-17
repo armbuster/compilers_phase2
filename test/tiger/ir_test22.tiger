@@ -1,0 +1,12 @@
+/* Test basic array operations */
+main
+	let
+		type intArray = array[3] of int;
+		var a : intArray;
+	in begin
+        a[0] := 10;
+        a[1] := 20;
+        a[2] := a[0] + a[1];
+
+        printi(a[2]);
+	end

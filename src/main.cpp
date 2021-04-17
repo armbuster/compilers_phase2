@@ -41,12 +41,21 @@ int main(int argc, char* argv[]) {
     if (optionExists(argv, argv+argc, "-r"))
     {
         inputFile = getOption(argv, argv+argc, "-r");
+
+        // Temp addition... can eventually comment out
+        std::string baseFilename = inputFile.substr(inputFile.find_last_of("/\\") + 1);
+        std::string::size_type const p(baseFilename.find_last_of('.'));
+        std::string fileNameWithoutExt = baseFilename.substr(0, p);
+        std::string outputPath = "output/";
+
         std::string ext = ".ir";
         if (inputFile.size() > ext.size() &&
             inputFile.substr(inputFile.size() - ext.size()) == ".ir")
         {
             inputFileName = inputFile.substr(0, inputFile.size() - ext.size());
-            mipsOutputFile = inputFileName+".s";
+            mipsOutputFile = outputPath + fileNameWithoutExt + ".s";
+            //mipsOutputFile = inputFileName + ".s";
+            std::cout << mipsOutputFile << std::endl;
         }
         else
         {
@@ -86,7 +95,7 @@ int main(int argc, char* argv[]) {
     {
         IR::CFG* cfg = new IR::CFG(func);
         cfg->build();
-        //cfg->print();
+        cfg->print();
     }
 
     

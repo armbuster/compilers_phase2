@@ -1,0 +1,13 @@
+#start_function main
+void main()
+int-list: _2_a, a
+float-list:
+      main:
+      assign, a, 0, 
+      call, printi, a
+      assign, _2_a, 5, 
+      call, printi, _2_a
+      call, printi, a
+      return, , ,
+#end_function main
+

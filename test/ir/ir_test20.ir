@@ -1,0 +1,27 @@
+#start_function main
+void main()
+int-list: _t0, result
+float-list:
+      main:
+      callr, _t0, factorial, 7
+      assign, result, _t0, 
+      call, printi, result
+      return, , ,
+#end_function main
+
+#start_function factorial
+int factorial(int _2_n)
+int-list: _2_n, _3_tmp, _t1, _t2, _t3
+float-list:
+      factorial:
+      brneq, _2_n, 0, Label_2
+   Label_0:
+      return, 1, , 
+   Label_2:
+      sub, _2_n, 1, _t1
+      callr, _t2, factorial, _t1
+      assign, _3_tmp, _t2, 
+      mult, _2_n, _3_tmp, _t3
+      return, _t3, ,
+#end_function factorial
+
