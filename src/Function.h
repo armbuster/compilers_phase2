@@ -28,6 +28,7 @@ class Function {
     std::map<std::string, Register*>* argumentRegisters;
     std::deque<ProgramValue> params;
     int instr_count;
+    unsigned int id_ = 0;
 
     public:
         Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_, std::deque<std::string> params_);
@@ -46,5 +47,7 @@ class Function {
         std::string getName() { return funcName; };
         ProgramValue getProgramValue(std::string name) { return dtypeMap.at(name); };
         void checkForMissedBranches();
+        unsigned int getId() { return id_; }
+        void setId(unsigned int id) { id_ = id; }
 
 };

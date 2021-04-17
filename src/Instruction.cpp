@@ -349,7 +349,7 @@ void ArrayInstruction::print()
     }
     else if (instOpType==ARRAY_LOAD)
     {
-        printf("ARRAY - LOAD: %s %s %s = %s %s %s[%s %s %s]\n",
+        printf("ARRAY - LOAD: %s %s %s = %s %s %s[%s %s %s] ",
             getDataTypeString(value.dtype),
             getValueTypeString(value.vtype),
             value.value.c_str(),
@@ -362,7 +362,7 @@ void ArrayInstruction::print()
     }
     else //instOpType==ARRAY_ASSIGN
     {
-        printf("ARRAY - ASSIGN: %s %s %s = %s %s %s\n",
+        printf("ARRAY - ASSIGN: %s %s %s = %s %s %s ",
             getDataTypeString(arrayName.dtype),
             getValueTypeString(arrayName.vtype),
             arrayName.value.c_str(),

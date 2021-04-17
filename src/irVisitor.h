@@ -16,13 +16,14 @@
  class irVisitor : public tiger::tigerIrBaseVisitor {
      private:
         Module* mod;
-        Function* currentFunction;
+        Function* currentFunction = nullptr;
         bool isBranchTarget = false;
         std::string lastLabelText;
         Instruction* prevInst = nullptr;
         unsigned int instId = 0;
         bool lastVisitedLabel = false;
         std::map<std::string, ProgramValue> dtypeMap;
+        unsigned int functionCount = 0;
 
      public:
         irVisitor();
@@ -129,5 +130,7 @@
         void updateInstId(Instruction* inst);
 
         void checkIfFollowingLabel(Instruction* inst);
+
+        void initNewFunction();
 
 };

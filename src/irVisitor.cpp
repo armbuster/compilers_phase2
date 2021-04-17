@@ -24,12 +24,16 @@ antlrcpp::Any irVisitor::visitFunction(tiger::tigerIrParser::FunctionContext *ct
     std::string funcname = ctx->ID(0)->getText();
     std::deque<ProgramValue> intList = visit(ctx->varList(0));
     std::deque<ProgramValue> floatList = visit(ctx->varList(1));
+
+    //prep variables needed for each new CFG... this will need to change for interprocedural analysis
+    initNewFunction();
     
     // create function object
     currentFunction = new Function(funcname, dtype, floatList, intList, params);
     updateDtypeMap(currentFunction->getDtypeMap());
     visit(ctx->funcBody());
     mod->addFunction(currentFunction);
+
     return 0;
 
 }
@@ -516,4 +520,18 @@ void irVisitor::checkIfFollowingLabel(Instruction* inst)
         }
         lastVisitedLabel = false; //make sure this only happens once
     }
+}
+
+void irVisitor::initNewFunction()
+{
+    isBranchTarget = false;
+    prevInst = nullptr;
+    instId = 0;
+    lastVisitedLabel = false;
+
+    if (currentFunction != nullptr)
+    {
+        currentFunction->setId(functionCount);
+    }
+    ++functionCount;
 }

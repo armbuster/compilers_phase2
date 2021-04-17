@@ -15,6 +15,9 @@ void IR::CFG::build()
 {
 	BasicBlock* bb = nullptr;
 
+	// Assign id per function
+	id_ = function_->getId();
+
 	// std::cout << "CFG::build - 1" << std::endl;
 	// Iterate over the instructions in the function
 	for ( Instruction* inst : *function_->getInstructions() )
@@ -56,8 +59,8 @@ void IR::CFG::build()
 
 void IR::CFG::print()
 {
-	printf("CFG:\n");
-	for (BasicBlock* bb : basicBlocks_)
+	printf("CFG: ID: %d\n", id_);
+	for (BasicBlock* bb : *basicBlocks_)
 	{
 		printf("\t");
 		bb->print();
@@ -102,7 +105,7 @@ bool IR::CFG::markIfBrTarget(Instruction* inst)
 bool IR::CFG::addBasicBlock(BasicBlock* bb)
 {
 	bb->setId(bbCount_);
-	basicBlocks_.push_back(bb);
+	basicBlocks_->push_back(bb);
 	bbCount_ += 1;
 	return true;
 }
@@ -121,7 +124,7 @@ void IR::CFG::addEdges()
 {
 	BasicBlockContainer* parents;
 
-	for (BasicBlock* bb : basicBlocks_)
+	for (BasicBlock* bb : *basicBlocks_)
 	{
 		InstContainer* instructions = bb->getInstructions();
 		for (Instruction* inst : *instructions)

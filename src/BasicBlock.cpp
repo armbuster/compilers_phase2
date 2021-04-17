@@ -6,9 +6,6 @@ IR::BasicBlock::BasicBlock() : id_(0)
 
 bool IR::BasicBlock::addInstruction(Instruction* inst)
 {
-	// printf("DEBUG: IR::BasicBlock::addInstruction - enter\n");
-	// printf("inst->id_=%d\n", inst->getId());
-
 	instructions_->push_back(inst);
 	return true;
 }
