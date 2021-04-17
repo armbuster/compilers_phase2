@@ -1,0 +1,15 @@
+#start_function main
+void main()
+int-list:
+float-list:
+      main:
+      brleq, 1, 0, Label_1
+   Label_0:
+      call, printi, 1
+      goto, Label_2, , 
+   Label_1:
+      call, printi, 0
+   Label_2:
+      return, , ,
+#end_function main
+

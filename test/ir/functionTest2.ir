@@ -1,0 +1,15 @@
+#start_function main
+void main()
+int-list: result, square
+float-list:
+main:
+    callr, result, square, 10
+    return result
+#end_function main
+
+#start_function square
+int square(x)
+square:
+    mult x x _t1
+    return _t1
+#end_function square

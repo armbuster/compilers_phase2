@@ -1,0 +1,39 @@
+#start_function main
+void main()
+int-list: _t0, _t1, _t10, _t11, _t2, _t3, _t4, _t5, _t6, _t7, _t8, _t9, denominator, intercept, numerator, slope, x1, x2, y1, y2
+float-list:
+      main:
+      assign, y1, 1, 
+      assign, x1, 1, 
+      assign, y2, 2, 
+      assign, x2, 2, 
+      sub, y2, y1, _t0
+      assign, numerator, _t0, 
+      sub, x2, x1, _t1
+      assign, denominator, _t1, 
+      div, numerator, denominator, _t2
+      assign, slope, _t2, 
+      mult, slope, x2, _t3
+      sub, y2, _t3, _t4
+      assign, intercept, _t4, 
+      assign, x2, 7, 
+      mult, slope, x2, _t5
+      add, _t5, intercept, _t6
+      assign, y2, _t6, 
+      sub, y2, y1, _t7
+      sub, x2, x1, _t8
+      div, _t7, _t8, _t9
+      assign, slope, _t9, 
+      assign, _t10, 0, 
+      brneq, slope, 1, Label_0
+      assign, _t10, 1, 
+   Label_0:
+      call, printi, _t10
+      assign, _t11, 0, 
+      brneq, intercept, 0, Label_1
+      assign, _t11, 1, 
+   Label_1:
+      call, printi, _t11
+      return, , ,
+#end_function main
+

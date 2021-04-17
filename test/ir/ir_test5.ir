@@ -1,0 +1,20 @@
+#start_function main
+void main()
+int-list:
+float-list: a, b, c, d, e, f
+      main:
+      assign, d, 3.0, 
+      assign, e, 4.0, 
+      assign, f, 4.0, 
+      assign, a, 1.0, 
+      assign, c, 2.0, 
+      assign, b, 2.0, 
+      call, printf, a
+      call, printf, b
+      call, printf, c
+      call, printf, d
+      call, printf, e
+      call, printf, f
+      return, , ,
+#end_function main
+

@@ -1,0 +1,35 @@
+#start_function main
+void main()
+int-list: _t0, result
+float-list:
+      main:
+      callr, _t0, fib, 12
+      assign, result, _t0, 
+      call, printi, result
+      return, , ,
+#end_function main
+
+#start_function fib
+int fib(int _2_n)
+int-list: _2_n, _3_tmp1, _3_tmp2, _t1, _t2, _t3, _t4, _t5
+float-list:
+      fib:
+      assign, _3_tmp1, 0, 
+      assign, _3_tmp2, 0, 
+      brgt, _2_n, 1, Label_1
+   Label_0:
+      return, _2_n, , 
+      goto, Label_2, , 
+   Label_1:
+      sub, _2_n, 1, _t1
+      callr, _t2, fib, _t1
+      assign, _3_tmp1, _t2, 
+      sub, _2_n, 2, _t3
+      callr, _t4, fib, _t3
+      assign, _3_tmp2, _t4, 
+      add, _3_tmp1, _3_tmp2, _t5
+      return, _t5, , 
+   Label_2:
+      return, , ,
+#end_function fib
+

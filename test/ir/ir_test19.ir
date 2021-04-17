@@ -1,0 +1,32 @@
+#start_function main
+void main()
+int-list: _t0, result
+float-list:
+      main:
+      callr, _t0, doubleSquare, 10
+      assign, result, _t0, 
+      call, printi, result
+      return, , ,
+#end_function main
+
+#start_function square
+int square(int _2_x)
+int-list: _2_x, _t1
+float-list:
+      square:
+      mult, _2_x, _2_x, _t1
+      return, _t1, ,
+#end_function square
+
+#start_function doubleSquare
+int doubleSquare(int _3_y)
+int-list: _3_y, _t2, _t3
+float-list:
+      doubleSquare:
+      mult, _3_y, 2, _t2
+      assign, _3_y, _t2, 
+      callr, _t3, square, _3_y
+      assign, _3_y, _t3, 
+      return, _3_y, , 
+#end_function doubleSquare
+

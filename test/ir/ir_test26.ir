@@ -1,0 +1,34 @@
+#start_function main
+void main()
+int-list:
+float-list: _t0, result
+      main:
+      callr, _t0, squareRoot, 42.0
+      assign, result, _t0, 
+      call, printf, result
+      return, , ,
+#end_function main
+
+#start_function squareRoot
+float squareRoot(float _2_n)
+int-list:
+float-list: _2_n, _3_e, _3_x, _3_y, _t1, _t2, _t3, _t4, _t5
+      squareRoot:
+      assign, _3_e, 0.000001, 
+      assign, _3_x, _2_n, 
+      assign, _3_y, 1.0, 
+      Label_0:
+      sub, _3_x, _3_y, _t1
+      brleq, _t1, _3_e, Label_2
+   Label_1:
+      add, _3_x, _3_y, _t2
+      assign, _t3, 2, 
+      div, _t2, _t3, _t4
+      assign, _3_x, _t4, 
+      div, _2_n, _3_x, _t5
+      assign, _3_y, _t5, 
+      goto, Label_0, , 
+   Label_2:
+      return, _3_x, ,
+#end_function squareRoot
+

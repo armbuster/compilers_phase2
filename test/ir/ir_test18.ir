@@ -1,0 +1,20 @@
+#start_function main
+void main()
+int-list: _t0, result
+float-list:
+      main:
+      callr, _t0, square, 5
+      assign, result, _t0, 
+      call, printi, result
+      return, , ,
+#end_function main
+
+#start_function square
+int square(int _2_x)
+int-list: _2_x, _t1
+float-list:
+      square:
+      mult, _2_x, _2_x, _t1
+      return, _t1, , 
+#end_function square
+

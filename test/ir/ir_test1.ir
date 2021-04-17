@@ -1,0 +1,9 @@
+#start_function main
+void main()
+int-list:
+float-list:
+      main:
+      call, printi, 1
+      return, , ,
+#end_function main
+

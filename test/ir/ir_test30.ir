@@ -1,0 +1,57 @@
+#start_function main
+void main()
+int-list: _t0, _t1, _t2, _t3, _t4, _t5, _t6, _t7, _t8, cats[8], first, index, lowestIndex, size, smallest, subIndex
+float-list:
+      main:
+      array_store, cats, 0, 7
+      array_store, cats, 1, 2
+      array_store, cats, 2, 10
+      array_store, cats, 3, 20
+      array_store, cats, 4, 5
+      array_store, cats, 5, 6
+      array_store, cats, 6, 44
+      array_store, cats, 7, 33
+      assign, size, 8, 
+      assign, index, 0, 
+      goto, Label_1, , 
+   Label_0:
+      assign, lowestIndex, index, 
+      add, index, 1, _t0
+      assign, subIndex, _t0, 
+      goto, Label_4, , 
+   Label_3:
+      array_load, _t1, cats, subIndex
+      array_load, _t2, cats, lowestIndex
+      brgeq, _t1, _t2, Label_8
+   Label_6:
+      assign, lowestIndex, subIndex, 
+   Label_8:
+      add, 1, subIndex, subIndex
+   Label_4:
+      sub, size, 1, _t3
+      brleq, subIndex, _t3, Label_3
+   Label_5:
+      array_load, _t4, cats, index
+      assign, first, _t4, 
+      array_load, _t5, cats, lowestIndex
+      assign, smallest, _t5, 
+      array_store, cats, index, smallest
+      array_store, cats, lowestIndex, first
+      add, 1, index, index
+   Label_1:
+      sub, size, 1, _t6
+      brleq, index, _t6, Label_0
+   Label_2:
+      assign, index, 0, 
+      goto, Label_10, , 
+   Label_9:
+      array_load, _t7, cats, index
+      call, printi, _t7
+      add, 1, index, index
+   Label_10:
+      sub, size, 1, _t8
+      brleq, index, _t8, Label_9
+   Label_11:
+      return, , ,
+#end_function main
+

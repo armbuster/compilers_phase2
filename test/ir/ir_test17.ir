@@ -1,0 +1,19 @@
+#start_function main
+void main()
+int-list:
+float-list:
+      main:
+      call, printSquare, 10
+      return, , ,
+#end_function main
+
+#start_function printSquare
+void printSquare(int _2_x)
+int-list: _2_x, _t0
+float-list:
+      printSquare:
+      mult, _2_x, _2_x, _t0
+      call, printi, _t0
+      return, , ,
+#end_function printSquare
+

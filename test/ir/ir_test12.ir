@@ -1,0 +1,30 @@
+#start_function main
+void main()
+int-list: a, b, c
+float-list:
+      main:
+      assign, a, 1, 
+      assign, b, 2, 
+      assign, c, 3, 
+      brleq, a, b, Label_1
+   Label_0:
+      brleq, b, c, Label_4
+   Label_3:
+      call, printi, 1
+      goto, Label_5, , 
+   Label_4:
+      call, printi, 2
+   Label_5:
+      goto, Label_2, , 
+   Label_1:
+      brgeq, b, c, Label_7
+   Label_6:
+      call, printi, 3
+      goto, Label_8, , 
+   Label_7:
+      call, printi, 4
+   Label_8:
+   Label_2:
+      return, , ,
+#end_function main
+

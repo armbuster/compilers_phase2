@@ -1,0 +1,71 @@
+#start_function main
+void main()
+int-list: _t0, _t1, _t10, _t14, _t2, _t4, _t5, _t6, _t8, _t9, a, b
+float-list: _t12, _t13, c
+      main:
+      assign, a, 2, 
+      assign, _t0, 1, 
+      assign, _t1, 10, 
+      assign, _t2, 2, 
+      brgeq, _t2, 0, Label_0
+   Label_1:
+      div, _t0, _t1, _t1
+      sub, 0, _t2, _t2
+   Label_0:
+      breq, _t2, 0, Label_2
+   Label_3:
+      mult, _t1, _t0, _t0
+      sub, _t2, 1, _t2
+      goto, Label_0, , 
+   Label_2:
+      assign, b, _t0, 
+      call, printi, b
+      assign, _t4, 1, 
+      assign, _t5, a, 
+      assign, _t6, 3, 
+      brgeq, _t6, 0, Label_4
+   Label_5:
+      div, _t4, _t5, _t5
+      sub, 0, _t6, _t6
+   Label_4:
+      breq, _t6, 0, Label_6
+   Label_7:
+      mult, _t5, _t4, _t4
+      sub, _t6, 1, _t6
+      goto, Label_4, , 
+   Label_6:
+      assign, _t8, 1, 
+      assign, _t9, 3, 
+      assign, _t10, _t4, 
+      brgeq, _t10, 0, Label_8
+   Label_9:
+      div, _t8, _t9, _t9
+      sub, 0, _t10, _t10
+   Label_8:
+      breq, _t10, 0, Label_10
+   Label_11:
+      mult, _t9, _t8, _t8
+      sub, _t10, 1, _t10
+      goto, Label_8, , 
+   Label_10:
+      assign, b, _t8, 
+      call, printi, b
+      assign, _t12, 1.0, 
+      assign, _t13, 5.50, 
+      assign, _t14, a, 
+      brgeq, _t14, 0, Label_12
+   Label_13:
+      div, _t12, _t13, _t13
+      sub, 0, _t14, _t14
+   Label_12:
+      breq, _t14, 0, Label_14
+   Label_15:
+      mult, _t13, _t12, _t12
+      sub, _t14, 1, _t14
+      goto, Label_12, , 
+   Label_14:
+      assign, c, _t12, 
+      call, printf, c
+      return, , ,
+#end_function main
+

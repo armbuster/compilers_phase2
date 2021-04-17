@@ -1,0 +1,28 @@
+#start_function main
+void main()
+int-list: _t4, a
+float-list: _t0, _t1, _t2, _t3, _t5, _t6, _t7, _t8, _t9, b, d
+      main:
+      assign, a, 1, 
+      assign, b, 2.0, 
+      assign, _t0, 1, 
+      assign, d, _t0, 
+      call, printf, d
+      assign, _t1, a, 
+      assign, d, _t1, 
+      call, printf, d
+      assign, _t2, a, 
+      add, _t2, b, _t3
+      assign, d, _t3, 
+      call, printf, d
+      add, 12, a, _t4
+      assign, _t5, _t4, 
+      add, _t5, 1.50, _t6
+      add, _t6, b, _t7
+      assign, _t8, 3, 
+      add, _t7, _t8, _t9
+      assign, d, _t9, 
+      call, printf, d
+      return, , ,
+#end_function main
+
