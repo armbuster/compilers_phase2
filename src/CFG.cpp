@@ -119,20 +119,21 @@ bool IR::CFG::resolveBasicBlock(BasicBlock* bb)
 
 void IR::CFG::addEdges()
 {
-	BasicBlockContainer* otherParents;
+	BasicBlockContainer* parents;
 
 	for (BasicBlock* bb : basicBlocks_)
 	{
-		for (Instruction* inst : *bb->getInstructions())
+		InstContainer* instructions = bb->getInstructions();
+		for (Instruction* inst : *instructions)
 		{
-			otherParents = inst->getSuccessorsParents();
-			if ( otherParents->empty() )
+			parents = inst->getSuccessorsParents();
+			if ( parents->empty() )
 			{
 				continue;
 			}
 			else //add forward edges
 			{
-				bb->setSuccessors(otherParents);
+				bb->setSuccessors(parents);
 			}
 		}
 	}

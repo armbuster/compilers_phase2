@@ -43,6 +43,7 @@ class Instruction {
         BasicBlockContainer* getSuccessorsParents();
         std::map<std::string, Register*>* getRegisterAssignments();
         void setRegisterAssignment(std::string, Register*);
+        bool instParentIsSelf(IR::BasicBlock* nextParent);
 
         void setId(unsigned int id) { id_ = id; }
         unsigned int getId() { return id_; }
@@ -57,6 +58,7 @@ class Instruction {
         //pure virtual
         virtual bool is(IR::InstType instType) = 0;
         virtual void print() = 0;
+
 };
 
 

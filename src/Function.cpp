@@ -71,10 +71,6 @@ void Function::addBranchTarget(std::string label, Instruction* targetInst)
     {
         brLabelToTargetInst->insert( {label, targetInst} );
     }
-    else
-    {
-        return;
-    }
 
     //if srcInst has already been traversed by the visitor then add edges...
     Instruction* srcInst = getBrSrcInst(label);
@@ -100,10 +96,6 @@ void Function::addBranchSrc(std::string label, Instruction* srcInst)
     if ( brLabelToSrcInst->find(label) == brLabelToSrcInst->end() )
     {
         brLabelToSrcInst->insert( {label, srcInst} );
-    }
-    else
-    {
-        return;
     }
     
     //if targetInst has already been traversed by the visitor then add edges...

@@ -79,6 +79,11 @@ BasicBlockContainer* Instruction::getSuccessorsParents()
         {
             successorsParents->push_back(nextParent);
         }
+        // If instruction is branch and parents are equal
+        if ( instParentIsSelf(nextParent) )
+        {
+            successorsParents->push_back(parent_);
+        }
     }
     return successorsParents;
 }
@@ -104,6 +109,16 @@ std::ostream& operator<<(std::ostream& out, const Instruction& instr)
         out << "(" << p.vtype << "," << p.value << ") ";
     
     return out;
+}
+
+bool Instruction::instParentIsSelf(IR::BasicBlock* nextParent)
+{
+    // If not a branch this inst can't target itself
+    if ( this->is(IR::BRANCH) && nextParent == parent_ )
+    {
+        return true;
+    }
+    return false;
 }
 
 //***************************************************************************************************
