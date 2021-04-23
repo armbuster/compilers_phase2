@@ -19,9 +19,10 @@ class CodeGenerator{
     std::map<std::string, MemoryLocation>* globalMap;
     Function* currentFunction;
     int currentStackSize;
+    RegisterAllocation registerAllocation;
 
     public:
-        CodeGenerator(Module * m, std::ostream * out);
+        CodeGenerator(Module * m, std::ostream * out, RegisterAllocation rAllocation);
         
 
         template<typename op1, typename op2, typename op3>
@@ -47,11 +48,13 @@ class CodeGenerator{
         
         
         void dumpToMemory(Register reg, std::string valName, std::map<std::string, MemoryLocation>* storageLocations);
-        void saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
-        void loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        //void saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        //void loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
+        void spillRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations);
         
         bool isAssignedRegister(std::string valName, Instruction * inst);
         Register getAssignedRegister(std::string valName, Instruction * inst);
+        RegisterAllocation getRegisterAllocationStrategy() { return registerAllocation; }
 
 
 

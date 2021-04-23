@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <deque>
+#include <set>
 #include <iostream>
 #include <typeinfo>
 #include <stdio.h>
@@ -13,7 +14,8 @@
 #include "typedefs.h"
 #include "BasicBlock.h"
 #include "Register.h"
-
+//#include "Web.h"
+class Web;
 
 class Instruction {
 
@@ -22,15 +24,18 @@ class Instruction {
         //std::map<std::string, DataType> operandTypes; // types of operands
         std::vector<ProgramValue> define; // names of operands that are defined here
         std::vector<ProgramValue> use; // names of operands that are used here
-        std::vector<ProgramValue> in; // in set - UPDATED BY LIVELINESS ANALYSIS
-        std::vector<ProgramValue> out; // out set - UPDATED BY LIVELINESS ANALYSIS
+        std::set<ProgramValue>* in; // in set - UPDATED BY LIVELINESS ANALYSIS
+        std::set<ProgramValue>* out; // out set - UPDATED BY LIVELINESS ANALYSIS
         bool leader; // whether or not this instruction is the start of a basic block
         bool branchTarget;
+        bool isFinalInstr = false; // whether or not this instruction is the last in its BB
         IR::BasicBlock* parent_;
         InstContainer* successors_ = new InstContainer();
         InstContainer* predecessors_ = new InstContainer();
         unsigned int id_;
         std::map<std::string, Register*>* registerAssignments; // map from variable names to storage locations
+        std::map<std::string, int> webIds;
+        std::map<std::string, Web*> webPtrs;
 
     public:
         Instruction(InstOpType instOpType_, std::vector<ProgramValue> define_, std::vector<ProgramValue> use_);
@@ -54,6 +59,35 @@ class Instruction {
         void setParent(IR::BasicBlock* parent) { parent_ = parent; }
         IR::BasicBlock* getParent() { return parent_; }
         InstOpType getInstOpType() { return instOpType; }
+        std::vector<ProgramValue>* getUse() { return &use; }
+        std::vector<ProgramValue>* getDefine() { return &define; }
+        void markAsFinal() { isFinalInstr=true; }
+        bool isFinal() { return isFinalInstr; }
+        void updateInSet();
+        bool updateOutSet();
+        void printIn();
+        void printOut();
+        void setOutSet(std::set<ProgramValue> outSet) { *out = outSet; } // testing
+        std::set<ProgramValue>* getInSet() { return in; }
+        std::set<ProgramValue>* getOutSet() { return out; }
+        InstContainer* getPredecessors() { return predecessors_; }
+        InstContainer* getSuccessors() { return successors_; }
+
+        bool isinOut(std::string);
+        bool isinIn(std::string);
+        bool isinDef(std::string);
+        bool isinUse(std::string);
+        std::map<std::string, Web*>* getWebPtrs() { return &webPtrs; }
+        void setWebId(std::string var, int id) { webIds[var]=id; }
+        void setWebPtr(std::string var, Web* p) { webPtrs[var]=p; }
+        
+        int getWebId(std::string var) { return webIds.at(var); }
+        Web* getWebPtr(std::string var) { return webPtrs.at(var); }
+        bool webExists(std::string var) { return webIds.find(var) != webIds.end(); }
+
+
+
+
 
         //pure virtual
         virtual bool is(IR::InstType instType) = 0;

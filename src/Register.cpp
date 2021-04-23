@@ -23,10 +23,17 @@ Register::Register(RegisterClass r, int registerIndex)
     ind = registerIndex;
 }
 
-RegisterClass Register::getRegisterClass()
+Register::Register(const Register &obj)
 {
-    return R;
+    R = obj.R;
+    ind = obj.ind;
 }
+
+// Register::Register(Register &&obj)
+// {
+//     R = obj.R;
+//     ind = obj.ind;
+// }
 
 
 
@@ -40,6 +47,7 @@ std::map<RegisterClass, std::string> m = {
     {RA,"$ra"},
     {FP,"$fp"}
 };
+
 
 std::ostream& operator<<(std::ostream& out, const Register& r)
 {

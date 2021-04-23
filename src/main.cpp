@@ -4,6 +4,9 @@
 #include "ParseTree.h"
 #include "CFG.h"
 #include "CodeGenerator.h"
+#include "IntraBlockAllocation.h"
+#include "GraphColoring.h"
+
 
 // CITATION:
 // got these two functions for parsing command line arguments from here
@@ -30,32 +33,17 @@ int main(int argc, char* argv[]) {
     std::string inputFileName;
     std::string mipsOutputFile;
 
-    // if (optionExists(argv, argv+argc, "-l"))
-    //     tokens_code=2;
-    // else if(optionExists(argv, argv+argc, "-p"))
-    //     tokens_code=1;
-    // else
-    //     tokens_code=0;
 
     // read input file
     if (optionExists(argv, argv+argc, "-r"))
     {
         inputFile = getOption(argv, argv+argc, "-r");
-
-        // Temp addition... can eventually comment out
-        std::string baseFilename = inputFile.substr(inputFile.find_last_of("/\\") + 1);
-        std::string::size_type const p(baseFilename.find_last_of('.'));
-        std::string fileNameWithoutExt = baseFilename.substr(0, p);
-        std::string outputPath = "output/";
-
         std::string ext = ".ir";
         if (inputFile.size() > ext.size() &&
             inputFile.substr(inputFile.size() - ext.size()) == ".ir")
         {
             inputFileName = inputFile.substr(0, inputFile.size() - ext.size());
-            mipsOutputFile = outputPath + fileNameWithoutExt + ".s";
-            //mipsOutputFile = inputFileName + ".s";
-            std::cout << mipsOutputFile << std::endl;
+            mipsOutputFile = inputFileName+".s";
         }
         else
         {
@@ -70,6 +58,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    RegisterAllocation rallocation = BRIGGS;
     tiger::ParseTree * parseTree = new tiger::ParseTree(inputFile);
     
     parseTree->visitTree();
@@ -83,6 +72,8 @@ int main(int argc, char* argv[]) {
     {
         outputFile = new std::ofstream();
         outputFile->open(mipsOutputFile, std::ios::out);
+        if(!outputFile)
+            return -1;
         out = outputFile;
     }
     else
@@ -91,21 +82,26 @@ int main(int argc, char* argv[]) {
     }
 
 
+    std::vector<IR::CFG*>* cfgList = new std::vector<IR::CFG*>;
     for (Function* func : *mod->getFunctions())
     {
         IR::CFG* cfg = new IR::CFG(func);
+        cfgList->push_back(cfg);
         cfg->build();
-        cfg->print();
     }
 
-    
-    // if register allocation strategy is not naive
-    /// GARRETS SECTION    
-    // CFG cfg(program); // GARRET
+    if(rallocation==INTRA_BLOCK)
+        intraBlockAllocation(cfgList);
+    if(rallocation==BRIGGS)
+        briggsGraphColoring(cfgList);
+
+    //for(IR::CFG* cfg : *cfgList)
+    //    cfg->print();
 
 
-    // END GARRETS SECION
-    CodeGenerator codeGenerator(mod, out); // ALEX
+
+
+    CodeGenerator codeGenerator(mod, out, rallocation); // ALEX
     return 0;
 
 }

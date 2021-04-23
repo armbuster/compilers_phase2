@@ -35,12 +35,15 @@ Function::Function(std::string name_, DataType rtype_, std::deque<ProgramValue> 
     // only ints are assigned to argument registers
     for(int i=0; i < params.size(); i++)
     {
+        std::string p = params_[i];
         if(params[i].dtype==INT)
         {
-            std::string p = params_[i];
             Register * r = new Register(A, i);
             (*argumentRegisters)[p] = r;
+            isinMemoryMap[p]=false;
         }
+        else
+            isinMemoryMap[p]=true;
 
     }
 }
@@ -73,12 +76,12 @@ void Function::addBranchTarget(std::string label, Instruction* targetInst)
     }
 
     //if srcInst has already been traversed by the visitor then add edges...
-    Instruction* srcInst = getBrSrcInst(label);
-    if ( srcInst != nullptr )
-    {
-        srcInst->addSuccessor(targetInst);
-        targetInst->addPredecessor(srcInst);
-    }
+    //Instruction* srcInst = getBrSrcInst(label);
+    //if ( srcInst != nullptr )
+    //{
+    //    srcInst->addSuccessor(targetInst);
+    //    targetInst->addPredecessor(srcInst);
+    //}
 }
 
 bool Function::isinScope(std::string name)

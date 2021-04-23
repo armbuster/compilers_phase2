@@ -35,7 +35,10 @@ class Register {
         friend std::ostream& operator<<(std::ostream& out, const Register& r);
         friend bool operator==(const Register& lhs, const Register& rhs);
         friend bool operator!=(const Register& lhs, const Register& rhs);
-        Register(RegisterClass r, int registerIndex=-1);
+        Register(RegisterClass r = SP, int registerIndex=-1);
+        Register(const Register &obj);
+        // Register(Register &&obj);
         //Register(const Register& r);
-        RegisterClass getRegisterClass();
+        RegisterClass getRegisterClass(){ return R; };
+        int getRegisterIndex() { return ind; }
 };

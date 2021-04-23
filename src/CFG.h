@@ -23,7 +23,9 @@ class CFG
  	void print();
 
  	void setId(unsigned int id) { id_ = id; }
-
+	BasicBlockContainer* getBasicBlocks() { return basicBlocks_; }
+	Function* getFunction() { return function_; }
+	
  private:
  	Function* function_;
  	BasicBlockContainer* basicBlocks_ = new BasicBlockContainer();

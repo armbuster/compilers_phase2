@@ -26,13 +26,13 @@ class Function {
     std::deque<ProgramValue> intList;                               // int variables used
     std::map<std::string, ProgramValue> dtypeMap;
     std::map<std::string, Register*>* argumentRegisters;
+    std::map<std::string, bool> isinMemoryMap;
     std::deque<ProgramValue> params;
     int instr_count;
     unsigned int id_ = 0;
 
     public:
         Function(std::string name_, DataType rtype_, std::deque<ProgramValue> floatList_, std::deque<ProgramValue> intList_, std::deque<std::string> params_);
-
         void addInstruction(Instruction* instr);
         void addBranchTarget(std::string label);
         void addBranchTarget(std::string labelText, Instruction* targetInst);
@@ -49,5 +49,9 @@ class Function {
         void checkForMissedBranches();
         unsigned int getId() { return id_; }
         void setId(unsigned int id) { id_ = id; }
+        void markInMemory(std::string var) { isinMemoryMap[var]=true; }
+        void markInRegister(std::string var) { isinMemoryMap[var]=false; }
+        bool isinMemory(std::string var) { return isinMemoryMap.at(var); }
+        std::map<std::string, bool>* getMemoryMap() { return &isinMemoryMap; }
 
 };
