@@ -19,6 +19,8 @@ Instruction::Instruction(InstOpType instOpType_, std::vector<ProgramValue> defin
     leader = false;
     branchTarget = false;
     registerAssignments = new std::map<std::string, Register *>();
+    in = new std::set<ProgramValue>;
+    out = new std::set<ProgramValue>;
 }
 
 bool Instruction::addSuccessor(Instruction* successor)
@@ -64,7 +66,68 @@ void Instruction::printPredecessors()
 void Instruction::printParent()
 {
     printf("ParentBasicBlock: %d", parent_->getId());
+    printf("\n");
 }
+
+void Instruction::printIn()
+{
+    printf("\t inSet: ");
+    for(ProgramValue p : *in)
+        std::cout << p.value << " ";
+    std::cout << std::endl;
+}
+
+
+void Instruction::printOut()
+{
+    printf("\t outSet: ");
+    for(ProgramValue p : *out)
+        std::cout << p.value << " ";
+    std::cout << std::endl;
+}
+
+
+
+void Instruction::updateInSet()
+{
+    *in = *out;
+    for(ProgramValue e : define)
+        in->erase(e);
+    for(ProgramValue e : use)
+    {
+        if(e.vtype==VAR)
+            in->insert(e);
+    }
+}
+
+bool checkSetEquality(std::set<ProgramValue> * a, std::set<ProgramValue> * b)
+{
+    if(a->size() != b->size())
+        return false;
+    for(ProgramValue p : *a)
+    {
+        if(b->find(p) == b->end())
+            return false;
+    }
+    return true;
+}
+
+
+
+bool Instruction::updateOutSet()
+{
+    std::set<ProgramValue>* out_ = out;
+    out = new std::set<ProgramValue>;
+
+    InstContainer* successors = getSuccessors();
+    for(Instruction* instr : *successors)
+    {
+        for(ProgramValue p : *instr->getInSet())
+            out->insert(p);
+    }
+    return !checkSetEquality(out_, out);
+}
+
 
 BasicBlockContainer* Instruction::getSuccessorsParents()
 {
@@ -79,7 +142,7 @@ BasicBlockContainer* Instruction::getSuccessorsParents()
         {
             successorsParents->push_back(nextParent);
         }
-        // If instruction is branch and parents are equal
+        // If instruction is branch and nextParent._parent==_parent
         if ( instParentIsSelf(nextParent) )
         {
             successorsParents->push_back(parent_);
@@ -90,7 +153,8 @@ BasicBlockContainer* Instruction::getSuccessorsParents()
 
 void Instruction::setRegisterAssignment(std::string name, Register* reg)
 {
-
+    // this check prevents us from overwriting function argument register assignments
+    if(registerAssignments->find(name) == registerAssignments->end())
         (*registerAssignments)[name]=reg;
 }
 
@@ -121,6 +185,55 @@ bool Instruction::instParentIsSelf(IR::BasicBlock* nextParent)
     return false;
 }
 
+bool Instruction::isinDef(std::string var)
+{
+    for(ProgramValue p : define)
+    {
+        if (p.value==var)
+            return true;
+    }
+    return false;
+}
+
+bool Instruction::isinUse(std::string var)
+{
+    for(ProgramValue p : use)
+    {
+        if (p.value==var)
+            return true;
+    }
+    return false;
+}
+
+bool Instruction::isinOut(std::string var)
+{
+    for(ProgramValue p : *out)
+    {
+        if (p.value==var)
+            return true;
+    }
+    return false;
+}
+
+bool Instruction::isinIn(std::string var)
+{
+    for(ProgramValue p : *in)
+    {
+        if (p.value==var)
+            return true;
+    }
+    return false;
+}
+
+
+
+
+
+
+
+
+
+
 //***************************************************************************************************
 // Assign
 bool AssignInstruction::is(IR::InstType instType)
@@ -141,6 +254,8 @@ void AssignInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -175,6 +290,8 @@ void BinaryInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -217,6 +334,8 @@ void BranchInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -248,6 +367,8 @@ void GotoInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -268,6 +389,8 @@ void ReturnInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -314,6 +437,8 @@ void CallInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
 
@@ -373,8 +498,12 @@ void ArrayInstruction::print()
     printSuccessors();
     printPredecessors();
     printParent();
+    printIn();
+    printOut();
     printf("\n");
 }
+
+
 
 void ArrayInstruction::setOperands(ProgramValue arrayName_, ProgramValue value_, ProgramValue index_)
 {

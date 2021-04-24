@@ -3,9 +3,9 @@
 
 //#include "FunctionWriter.h"
 
-CodeGenerator::CodeGenerator(Module* m, std::ostream * out)
+CodeGenerator::CodeGenerator(Module* m, std::ostream * out, RegisterAllocation rAllocation)
 {
-    
+    registerAllocation=rAllocation;
     outStream = out;
     
     // get all function names
@@ -114,9 +114,6 @@ std::map<std::string, MemoryLocation>* CodeGenerator::stackSetup(Function* func)
             write2Op("sw", Register(A, i), storageLocations->at((*params)[i].value));
     }
 
-
-
-
     return storageLocations;
 }
 
@@ -134,9 +131,50 @@ void CodeGenerator::genFunction(Function* func)
     std::vector<Instruction*>* instructions = func->getInstructions();
     for(std::vector<Instruction*>::iterator it = instructions->begin(); it != instructions->end(); it++)
     {
+        if(registerAllocation == INTRA_BLOCK && (*it)->isFinal())
+            spillRegisters(*it, storageLocations);
         genInstruction(*it, storageLocations);
+        if(registerAllocation == INTRA_BLOCK && (*it)->isFinal())
+            spillRegisters(*it, storageLocations);
     }
 }
+
+void CodeGenerator::spillRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    // for each variable that is in storageLocations and is currently in a register, spill to memory
+    
+    std::map<std::string, bool> * vars = currentFunction->getMemoryMap();
+    for(auto& it : *vars)
+    {
+        std::string val = it.first;
+        if (!currentFunction->isinMemory(val))
+        {
+            // if this lookup fails it is a bug, because it means that a value is still in  register
+            // from an earlier BB
+            Register r = getAssignedRegister(val, instr);
+            MemoryLocation memLocation = storageLocations->at(val);
+            DataType dtype = currentFunction->getDtype(val).dtype;
+            if(dtype==FLOAT)
+            {
+                assert(r.getRegisterClass()==F);
+                write2Op("s.s", r, memLocation);
+            }
+            else if(dtype==INT)
+            {
+                RegisterClass rClass=r.getRegisterClass();
+                assert(rClass==T || rClass==S || rClass == A);
+                write2Op("sw", r, memLocation);
+            }
+            else
+                assert(false);
+            currentFunction->markInMemory(val);
+        }
+    // should function arguments be spilled here as well?
+    // what about when registers are spilled before function call?
+
+    }
+}
+
 
 
 
@@ -264,30 +302,6 @@ int CodeGenerator::getSubroutineMaxArguments(Function* func)
 }
 
 
-
-Register CodeGenerator::getStoreReg(ProgramValue name, Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations)
-{
-    // if name is assigned a register, return assigned register
-    std::map<std::string, Register*>* registerAssignments = inst->getRegisterAssignments();
-    if (registerAssignments->find(name.value) != registerAssignments->end())
-        return *(registerAssignments->at(name.value));
-    
-    // else return $t0
-    else
-    {   
-        if (name.dtype==INT)
-            return Register(T,0);
-        else if (name.dtype==FLOAT)
-            return Register(F,0);
-        else
-        {
-            assert(false);
-        }
-
-    }
-        
-}
-
 bool CodeGenerator::isAssignedRegister(std::string valName, Instruction * inst)
 {
         // if name is assigned a register, return assigned register
@@ -308,7 +322,31 @@ Register CodeGenerator::getAssignedRegister(std::string valName, Instruction * i
 }
 
 
+Register CodeGenerator::getStoreReg(ProgramValue name, Instruction * inst, std::map<std::string, MemoryLocation>* storageLocations)
+{
+    // if name is assigned a register, return assigned register
+    if(isAssignedRegister(name.value, inst))
+    {
+        Register R = getAssignedRegister(name.value, inst);
+        currentFunction->markInRegister(name.value);
+        return R;
+    }
+    
+    // else return $t0
+    else
+    {   
+        if (name.dtype==INT)
+            return Register(T,0);
+        else if (name.dtype==FLOAT)
+            return Register(F,0);
+        else
+        {
+            assert(false);
+        }
 
+    }
+        
+}
 
 
 Register CodeGenerator::getLoadReg(ProgramValue name, Instruction * inst, int defaultRegisterIndex, std::map<std::string, MemoryLocation>* storageLocations)
@@ -330,15 +368,41 @@ Register CodeGenerator::getLoadReg(ProgramValue name, Instruction * inst, int de
     }
     else
     {
+
+        // case 1/2
         if(isAssignedRegister(name.value, inst))
-            return getAssignedRegister(name.value, inst);
+        {
+            MemoryLocation variableLoc(0,Register(T,0));
+            if(storageLocations->find(name.value) != storageLocations->end())
+                variableLoc = storageLocations->at(name.value);
+            else
+                assert(false);
+            Register R =  getAssignedRegister(name.value, inst);
+            
+            // if this is true case 2, otherwise case 1
+            if(currentFunction->isinMemory(name.value))
+            {
+                if(name.dtype==INT)
+                    write2Op("lw", R, variableLoc);
+                else if(name.dtype==FLOAT)
+                    write2Op("l.s", R, variableLoc);
+                else
+                    assert(false);
+                currentFunction->markInRegister(name.value);
+            }
+            return R;
+        }
         
         // else load variable into default register and return
         else
         {
             MemoryLocation variableLoc(0,Register(T,0));
             if(storageLocations->find(name.value) != storageLocations->end())
+            {
+                // if local variable is not assigned a register, it must be in memory
+                assert(currentFunction->isinMemory(name.value));
                 variableLoc = storageLocations->at(name.value);
+            }   
             else if(globalMap->find(name.value) != globalMap->end())
                 variableLoc = globalMap->at(name.value);
             else
@@ -362,26 +426,26 @@ Register CodeGenerator::getLoadReg(ProgramValue name, Instruction * inst, int de
 
 }
 
-void CodeGenerator::saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
-{
-    std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
-    for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
-    {
-        MemoryLocation memLoc = storageLocations->at(it->first);
-        write2Op("sw", *(it->second), memLoc);
-    }
+// void CodeGenerator::saveRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+// {
+//     std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
+//     for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
+//     {
+//         MemoryLocation memLoc = storageLocations->at(it->first);
+//         write2Op("sw", *(it->second), memLoc);
+//     }
 
-}
+// }
 
-void CodeGenerator::loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
-{
-    std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
-    for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
-    {
-        MemoryLocation memLoc = storageLocations->at(it->first);
-        write2Op("lw", *(it->second), memLoc);
-    }
-}
+// void CodeGenerator::loadRegisters(Instruction* instr, std::map<std::string, MemoryLocation>* storageLocations)
+// {
+//     std::map<std::string, Register*>* rAssignments = instr->getRegisterAssignments();
+//     for(std::map<std::string, Register*>::iterator it = rAssignments->begin(); it != rAssignments->end(); it++)
+//     {
+//         MemoryLocation memLoc = storageLocations->at(it->first);
+//         write2Op("lw", *(it->second), memLoc);
+//     }
+// }
 
 
 void CodeGenerator::dumpToMemory(Register storeRegister, std::string valName, std::map<std::string, MemoryLocation>* storageLocations)
@@ -404,6 +468,7 @@ void CodeGenerator::dumpToMemory(Register storeRegister, std::string valName, st
     {
         write2Op("s.s", storeRegister, variableLoc);
     }
+    currentFunction->markInMemory(valName);
 
 }
 
@@ -415,9 +480,9 @@ void CodeGenerator::genBinary(Instruction* instr, std::map<std::string, MemoryLo
     ProgramValue rhs2 = binaryInstr->rhs2;
     ProgramValue lhs = binaryInstr->lhs;
 
-    Register storeRegister = getStoreReg(lhs, instr, storageLocations);
     Register loadRegister1 = getLoadReg(rhs1, instr, 1, storageLocations);
     Register loadRegister2 = getLoadReg(rhs2, instr, 2, storageLocations);
+    Register storeRegister = getStoreReg(lhs, instr, storageLocations);
 
     //assert((loadRegister1.getRegisterClass() == loadRegister2.getRegisterClass()) && (loadRegister2.getRegisterClass() == storeRegister.getRegisterClass()));
     
@@ -427,7 +492,8 @@ void CodeGenerator::genBinary(Instruction* instr, std::map<std::string, MemoryLo
     write3Op(instruction, storeRegister, loadRegister1, loadRegister2);
     if(!isAssignedRegister(lhs.value, instr))
         dumpToMemory(storeRegister, lhs.value, storageLocations);
-
+    else
+        currentFunction->markInRegister(lhs.value);
 
 }
 
@@ -438,8 +504,9 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
     write2Op("sw", Register(RA), storageLocations->at("_ra"));
     CallInstruction * callInstr = (CallInstruction*) instr;
     
-    // spill allocated registers
-    saveRegisters(instr, storageLocations);
+    std::string callee = callInstr->funcname;
+    if(callee != "printi" && callee != "printf")
+        spillRegisters(instr, storageLocations);
 
     for(int i = 0; i < (callInstr->args).size(); i++)
     {
@@ -458,18 +525,22 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
 
             }
 
-                
-
             else if(arg.vtype==VAR)
             {
-                if(!isAssignedRegister(arg.value, instr))
+                if(currentFunction->isinMemory(arg.value))
                 {
                     MemoryLocation memLocation = storageLocations->at(arg.value);
                     write2Op("lw", Register(A, i), memLocation);
                 }
                 else if(Register(A, i) != getAssignedRegister(arg.value, instr))
                 {
-                    write2Op("copy", Register(A, i), getAssignedRegister(arg.value, instr));
+                    if(arg.dtype==INT)
+                        write2Op("move", Register(A, i), getAssignedRegister(arg.value, instr));
+                    else if (arg.dtype==FLOAT)
+                        write2Op("mfc1", Register(A,i), getAssignedRegister(arg.value, instr));
+                    else
+                        assert(false);
+                    
                 }
                     
             }
@@ -485,7 +556,7 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
     write2Op("lw", Register(RA), storageLocations->at("_ra"));
     
     // restore allocated registers
-    loadRegisters(instr, storageLocations);
+    //loadRegisters(instr, storageLocations);
 
     
     // if there is a return val, copy it from $v0
@@ -505,6 +576,8 @@ void CodeGenerator::genCall(Instruction* instr, std::map<std::string, MemoryLoca
 
         if(!isAssignedRegister(rval.value, instr))
             dumpToMemory(storeReg, rval.value, storageLocations);
+        else
+            currentFunction->markInRegister(rval.value);
     }
 
 }
@@ -542,6 +615,8 @@ void CodeGenerator::genAssign(Instruction* instr, std::map<std::string, MemoryLo
 
         if(!isAssignedRegister(lhs.value, instr))
             dumpToMemory(storeRegister, lhs.value, storageLocations);
+        else
+            currentFunction->markInRegister(lhs.value);
     }
     else
     {
@@ -634,7 +709,6 @@ void CodeGenerator::genBranch(Instruction* instr, std::map<std::string, MemoryLo
             }
         }
     }
-
 }
 
 
@@ -710,7 +784,10 @@ void CodeGenerator::genArrayAccess(Instruction* instr, std::map<std::string, Mem
     {
         Register valReg = getStoreReg(val, instr, storageLocations);
         write2Op("lw", valReg, elementAddr);
-        dumpToMemory(valReg, val.value, storageLocations);
+        if(!isAssignedRegister(val.value, instr))
+            dumpToMemory(valReg, val.value, storageLocations);
+        else
+            currentFunction->markInRegister(val.value);
     }
     else
     {

@@ -27,11 +27,14 @@ class BasicBlock
  	void addSuccessor(BasicBlock* bb);
  	void addPredecessor(BasicBlock* bb);
  	void print();
-
+	void markFinalInstruction();
+	bool inSetsComputed = false;
  	void setId(unsigned int id) { id_ = id; };
  	unsigned int getId() { return id_; };
  	InstContainer* getInstructions() { return instructions_; }
  	void setSuccessors(BasicBlockContainer* successors) { successors_ = successors; }
+	BasicBlockContainer* getSuccessors() { return successors_; }
+	BasicBlockContainer* getPredecessors() { return predecessors_; }
 
  private:
  	InstContainer* instructions_ = new InstContainer();
@@ -42,6 +45,7 @@ class BasicBlock
     std::vector<ProgramValue> outSet_; 	// out set - UPDATED BY LIVELINESS ANALYSIS
 
     void printSuccessors();
+	void printPredecessors();
 
 
 };

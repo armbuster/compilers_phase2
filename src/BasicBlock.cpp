@@ -10,6 +10,15 @@ bool IR::BasicBlock::addInstruction(Instruction* inst)
 	return true;
 }
 
+void IR::BasicBlock::markFinalInstruction()
+{
+	Instruction* finalInstruction = instructions_->at(instructions_->size()-1);
+	finalInstruction->markAsFinal();
+}
+
+
+
+
 void IR::BasicBlock::addSuccessor(BasicBlock* bb)
 {
 	successors_->push_back(bb);
@@ -29,6 +38,7 @@ void IR::BasicBlock::print()
 		inst->print();
 	}
 	printSuccessors();
+	printPredecessors();
 	printf("\n\n");
 }
 
@@ -40,5 +50,16 @@ void IR::BasicBlock::printSuccessors()
 	for (BasicBlock* successor : *successors_)
 	{
 		printf("%d ", successor->getId());
+	}
+}
+
+// Private
+void IR::BasicBlock::printPredecessors()
+{
+	printf("\t");
+	printf("BasicBlockPredecessors: ");
+	for (BasicBlock* predecessor : *predecessors_)
+	{
+		printf("%d ", predecessor->getId());
 	}
 }

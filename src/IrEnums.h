@@ -2,8 +2,12 @@
 #define _SRC_IR_ENUMS_H
 
 
+#include <string>
+
 enum ValType {VAR, ARRAY, LITERAL, EMPTY};
 enum DataType {FLOAT, INT, VOID, UNKNOWN};
+enum RegisterAllocation {NAIVE, INTRA_BLOCK, BRIGGS};
+
 
 struct ProgramValue {
     ValType vtype;
@@ -11,6 +15,8 @@ struct ProgramValue {
     std::string value;
     int size;
 };
+
+bool operator<(const ProgramValue& a, const ProgramValue& b);
 
 enum InstOpType 
 {

@@ -20,7 +20,7 @@
         bool isBranchTarget = false;
         std::string lastLabelText;
         Instruction* prevInst = nullptr;
-        unsigned int instId = 0;
+        unsigned int instId = 2;
         bool lastVisitedLabel = false;
         std::map<std::string, ProgramValue> dtypeMap;
         unsigned int functionCount = 0;

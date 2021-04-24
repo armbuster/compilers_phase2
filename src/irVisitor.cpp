@@ -224,6 +224,10 @@ antlrcpp::Any irVisitor::visitGoto_op(tiger::tigerIrParser::Goto_opContext *ctx)
 
     // If this is a branch inst the next will be the target
     isBranchTarget = true;
+    
+    // alex: added this because goto's never fall through, so the successor is only the branch target
+    prevInst = nullptr;
+    
 
     return 0;
 }
@@ -269,6 +273,7 @@ antlrcpp::Any irVisitor::visitReturn_void(tiger::tigerIrParser::Return_voidConte
     isInstBrTarget(inst);
     updatePrevInst(inst);
     checkIfFollowingLabel(inst);
+    prevInst = nullptr;
 
     return 0;
 }
@@ -285,6 +290,7 @@ antlrcpp::Any irVisitor::visitReturn_nonvoid(tiger::tigerIrParser::Return_nonvoi
     isInstBrTarget(inst);
     updatePrevInst(inst);
     checkIfFollowingLabel(inst);
+    prevInst = nullptr;
 
     return 0;
 }

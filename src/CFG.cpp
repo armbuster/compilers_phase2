@@ -3,7 +3,7 @@
 #include "Instruction.h"
 
 // Public
-IR::CFG::CFG(Function* function) : bbCount_(0)
+IR::CFG::CFG(Function* function) : bbCount_(1)
 {
 	function_ = function;
 	isFirstInstruction_ = true;
@@ -105,6 +105,7 @@ bool IR::CFG::markIfBrTarget(Instruction* inst)
 bool IR::CFG::addBasicBlock(BasicBlock* bb)
 {
 	bb->setId(bbCount_);
+	bb->markFinalInstruction();
 	basicBlocks_->push_back(bb);
 	bbCount_ += 1;
 	return true;
@@ -134,9 +135,16 @@ void IR::CFG::addEdges()
 			{
 				continue;
 			}
-			else //add forward edges
+			else //add forward and backward edges
 			{
+				// forward edges
 				bb->setSuccessors(parents);
+				
+				// backward edges
+				for(IR::BasicBlock* successor : *parents)
+				{
+					successor->addPredecessor(bb);
+				}
 			}
 		}
 	}
