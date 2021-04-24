@@ -35,6 +35,9 @@ class BasicBlock
  	void setSuccessors(BasicBlockContainer* successors) { successors_ = successors; }
 	BasicBlockContainer* getSuccessors() { return successors_; }
 	BasicBlockContainer* getPredecessors() { return predecessors_; }
+	bool hasBeenVisited() { return visited_; }
+	void setVisited() { visited_ = true; }
+	void setUnvisited() { visited_ = false; }
 
  private:
  	InstContainer* instructions_ = new InstContainer();
@@ -43,6 +46,7 @@ class BasicBlock
  	unsigned int id_;
  	std::vector<ProgramValue> inSet_; 	// in set - UPDATED BY LIVELINESS ANALYSIS
     std::vector<ProgramValue> outSet_; 	// out set - UPDATED BY LIVELINESS ANALYSIS
+    bool visited_;
 
     void printSuccessors();
 	void printPredecessors();

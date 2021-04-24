@@ -21,6 +21,9 @@ class CFG
 
  	void build();
  	void print();
+ 	void markBlocksAsUnvisited();
+	bool allBlocksVisisted();
+	BasicBlock* getNextUnvisited();
 
  	void setId(unsigned int id) { id_ = id; }
 	BasicBlockContainer* getBasicBlocks() { return basicBlocks_; }

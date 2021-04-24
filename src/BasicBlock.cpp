@@ -1,7 +1,7 @@
 #include "BasicBlock.h"
 #include "Instruction.h"
 
-IR::BasicBlock::BasicBlock() : id_(0)
+IR::BasicBlock::BasicBlock() : id_(0), visited_(false)
 {}
 
 bool IR::BasicBlock::addInstruction(Instruction* inst)
@@ -15,9 +15,6 @@ void IR::BasicBlock::markFinalInstruction()
 	Instruction* finalInstruction = instructions_->at(instructions_->size()-1);
 	finalInstruction->markAsFinal();
 }
-
-
-
 
 void IR::BasicBlock::addSuccessor(BasicBlock* bb)
 {

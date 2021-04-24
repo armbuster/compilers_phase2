@@ -68,6 +68,37 @@ void IR::CFG::print()
 	printf("\n");
 }
 
+void IR::CFG::markBlocksAsUnvisited()
+{
+	for (BasicBlock* bb : *basicBlocks_)
+	{
+		bb->setUnvisited();
+	}
+}
+
+bool IR::CFG::allBlocksVisisted()
+{
+	bool allVisited = true; //init to true because of AND
+	for (BasicBlock* bb : *basicBlocks_)
+	{
+		allVisited &= bb->hasBeenVisited();
+	}
+	return allVisited;
+}
+
+IR::BasicBlock* IR::CFG::getNextUnvisited()
+{
+	for (BasicBlock* bb : *basicBlocks_)
+	{
+		// return the first BB that has not been visited
+		if ( !bb->hasBeenVisited() )
+		{
+			return bb;
+		}
+	}
+	return nullptr;
+}
+
 
 // Private
 bool IR::CFG::markIfFirstInst(Instruction* inst)
