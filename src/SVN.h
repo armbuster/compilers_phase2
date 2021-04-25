@@ -15,6 +15,8 @@ class SVN
  	SVN(CFG* cfg);
  	~SVN(){};
 
+ 	void printEbbs();
+
  private:
  	CFG* cfg_;
  	ExtendedBasicBlocks* extendedBasicBlocks_ = new ExtendedBasicBlocks();
